@@ -68,6 +68,11 @@ export interface RouteDecision {
   source?: string;
   /** Set when a fallback path produced the decision. */
   fallbackReason?: string;
+  /**
+   * True when a commit reused the typing-time preview for the same text on
+   * an unchanged tree. `latencyMs` is then the preview's measured latency.
+   */
+  reusedPreview?: boolean;
 }
 
 export interface RouteInput {

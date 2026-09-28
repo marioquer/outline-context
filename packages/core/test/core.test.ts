@@ -222,3 +222,37 @@ describe('DefaultCandidateBuilder', () => {
     expect(ids).toContain('arch'); // semantic hit
   });
 });
+
+describe('preview reuse', () => {
+  it('reuses the preview decision on send when nothing changed', async () => {
+    let calls = 0;
+    const router: Router = {
+      route: async () => {
+        calls += 1;
+        return { action: 'switch', targetNodeId: 'launch', confidence: 0.9, latencyMs: 42 };
+      },
+    };
+    const ct = seeded(router);
+    ct.activate('pricing');
+    await ct.preview('How do we launch?');
+    const r = await ct.add({ content: 'How do we launch?' });
+    expect(calls).toBe(1);
+    expect(r.decision).toMatchObject({ action: 'switch', reusedPreview: true, latencyMs: 42 });
+    expect(r.activeNodeId).toBe('launch');
+  });
+
+  it('routes again when the text or the tree changed', async () => {
+    let calls = 0;
+    const router: Router = { route: async ({ tree }) => ((calls += 1), { action: 'stay', targetNodeId: tree.activeNodeId!, confidence: 1 }) };
+    const ct = seeded(router);
+    ct.activate('pricing');
+    await ct.preview('draft one');
+    await ct.add({ content: 'draft two' });
+    expect(calls).toBe(2);
+    await ct.preview('same text');
+    ct.activate('launch');
+    const r = await ct.add({ content: 'same text' });
+    expect(calls).toBe(4); // two previews + two sends, none reused
+    expect(r.decision?.reusedPreview).toBeUndefined();
+  });
+});

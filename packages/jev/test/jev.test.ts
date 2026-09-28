@@ -86,3 +86,73 @@ describe('JevRouter + LocalJevBackend', () => {
     expect(r.decision?.fallbackReason).toMatch(/no scores/);
   });
 });
+
+describe('GatewayJevBackend', () => {
+  it('asks route + parent in one evaluate call and maps the distribution', async () => {
+    const { GatewayJevBackend } = await import('@context-tree/jev/gateway');
+    let call: any;
+    const backend = new GatewayJevBackend({
+      model: 'typesafe-ai/jev',
+      evaluate: (async (args: any) => {
+        call = args;
+        const keys = Object.keys(args.questions.route.criteria);
+        const pricing = keys.find((k) => String(args.questions.route.criteria[k]).endsWith('Pricing'))!;
+        return {
+          answers: {
+            route: { type: 'choice', choice: pricing, probabilities: Object.fromEntries(keys.map((k) => [k, k === pricing ? 0.9 : 0.1 / (keys.length - 1)])) },
+            parent: { type: 'choice', choice: pricing },
+          },
+          usage: { inputTokens: 900, outputTokens: 4, totalTokens: 904 },
+        };
+      }) as any,
+    });
+    const ct = project(new JevRouter({ backend }));
+    ct.activate('launch');
+    const r = await ct.add({ content: 'Back to pricing' });
+    expect(call.model).toBe('typesafe-ai/jev');
+    expect(call.state.new_message).toBe('Back to pricing');
+    expect(call.questions.route.criteria.NEW).toBeDefined();
+    expect(Object.values(call.questions.route.criteria)).toContain('Outline AI / Launch (current context)');
+    expect(call.questions.parent.type).toBe('choice');
+    expect(r.decision).toMatchObject({ action: 'switch', targetNodeId: 'pricing', source: 'jev:typesafe-ai/jev' });
+    expect(r.decision!.confidence).toBeCloseTo(0.9, 5);
+    expect(backend.lastCall?.inputTokens).toBe(900);
+  });
+
+  it('forks under the parent Jev picks', async () => {
+    const { GatewayJevBackend } = await import('@context-tree/jev/gateway');
+    const backend = new GatewayJevBackend({
+      evaluate: (async (args: any) => {
+        const keys = Object.keys(args.questions.route.criteria);
+        const bench = Object.keys(args.questions.parent.criteria).find((k) => String(args.questions.parent.criteria[k]).includes('Benchmark'))!;
+        return {
+          answers: {
+            route: { type: 'choice', choice: 'NEW', probabilities: Object.fromEntries(keys.map((k) => [k, k === 'NEW' ? 0.8 : 0.2 / (keys.length - 1)])) },
+            parent: { type: 'choice', choice: bench },
+          },
+          usage: {},
+        };
+      }) as any,
+    });
+    const ct = project(new JevRouter({ backend }));
+    ct.activate('bench');
+    const r = await ct.add({ content: 'Test prompt caching under frequent switching, as its own thread.' });
+    expect(r.decision?.action).toBe('fork');
+    expect(r.createdNode?.parentId).toBe('bench');
+  });
+
+  it('accepts a bare choice without a distribution', async () => {
+    const { GatewayJevBackend } = await import('@context-tree/jev/gateway');
+    const backend = new GatewayJevBackend({
+      evaluate: (async (args: any) => {
+        const k = Object.keys(args.questions.route.criteria).find((x) => String(args.questions.route.criteria[x]).endsWith('Launch'))!;
+        return { answers: { route: { type: 'choice', choice: k } }, usage: {} };
+      }) as any,
+    });
+    const ct = project(new JevRouter({ backend }));
+    ct.activate('pricing');
+    const r = await ct.add({ content: 'ship it' });
+    expect(r.decision).toMatchObject({ action: 'switch', targetNodeId: 'launch' });
+    expect(r.decision!.confidence).toBeCloseTo(0.88, 5);
+  });
+});

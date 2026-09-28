@@ -3,10 +3,12 @@ import { MoonIcon, PauseIcon, PlayIcon, RotateCcwIcon, SkipForwardIcon, SunIcon 
 import { useContextTreeDemo } from './engine.ts';
 import { ContextChat, Composer, Inspector, LinearChat } from './components.tsx';
 
-const demoMode = new URLSearchParams(window.location.search).get('demo') === 'true';
+const params = new URLSearchParams(window.location.search);
+const demoMode = params.get('demo') === 'true';
+const liveInDemo = params.get('live') === 'true';
 
 export function App() {
-  const s = useContextTreeDemo(demoMode);
+  const s = useContextTreeDemo(demoMode, liveInDemo);
   const { demo } = s;
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
 
@@ -55,6 +57,12 @@ export function App() {
           </span>
         </div>
         <div className="hdr-spacer" />
+        <span className="engine-chip" data-live={s.live?.jev.engine === 'jev'} title={s.live?.jev.engine === 'local' ? s.live.jev.reason : undefined}>
+          {s.live?.jev.engine === 'jev' ? `JEV · ${s.live.jev.model}` : 'JEV · LOCAL'}
+        </span>
+        <span className="engine-chip" data-live={s.liveReplies} title={s.live?.llm.engine === 'scripted' ? s.live.llm.reason : undefined}>
+          {s.liveReplies && s.live?.llm.engine === 'claude' ? `LLM · ${s.live.llm.model}` : 'LLM · SCRIPTED'}
+        </span>
         {demoMode ? (
           <>
             <span className="demo-step-label">
@@ -96,7 +104,7 @@ export function App() {
           streaming={s.streaming}
           committedNodeId={s.tree.activeNodeId}
         />
-        <Inspector tree={s.tree} committed={s.committed} preview={s.preview} newNodeId={s.newNodeId} backendName={s.backendName} />
+        <Inspector tree={s.tree} committed={s.committed} preview={s.preview} newNodeId={s.newNodeId} />
       </main>
 
       <Composer

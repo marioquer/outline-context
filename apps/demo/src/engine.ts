@@ -10,6 +10,7 @@ import {
 } from '@context-tree/core';
 import { JevRouter } from '@context-tree/jev';
 import { DEMO_STEPS, DEMO_SYSTEM, createDemoSession, createEmptySession } from './scenario.ts';
+import { SwitchableRouter, fetchStatus, remoteJevRouter, streamChat, type ApiStatus, type ApiUsage } from './live.ts';
 
 export interface TokenSnapshot {
   total: number;
@@ -24,6 +25,8 @@ export interface Committed {
   nodeId: NodeId;
   createdNodeId?: NodeId;
   tokens: TokenSnapshot;
+  /** Measured by the API when a live model produced the reply. */
+  api?: ApiUsage;
 }
 
 export interface Preview {
@@ -43,8 +46,24 @@ export interface Streaming {
 const PREVIEW_DEBOUNCE_MS = 250;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export function useContextTreeDemo(demoMode: boolean) {
-  const router = useMemo(() => new JevRouter(), []);
+export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
+  // Starts on the local reference backend; switches to real Jev once the dev
+  // server reports a gateway key.
+  const router = useMemo(() => new SwitchableRouter(new JevRouter()), []);
+  const [live, setLive] = useState<ApiStatus | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetchStatus().then((st) => {
+      if (cancelled || !st) return;
+      if (st.jev.engine === 'jev') router.current = remoteJevRouter(st.jev.model);
+      setLive(st);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+  // The recorded demo keeps its scripted replies unless ?live=true.
+  const liveReplies = live?.llm.engine === 'claude' && (!demoMode || liveInDemo);
   const sessionRef = useRef<ContextTreeSession | null>(null);
   if (!sessionRef.current) {
     sessionRef.current = demoMode ? createDemoSession(router) : createEmptySession(router);
@@ -123,24 +142,44 @@ export function useContextTreeDemo(demoMode: boolean) {
       if (res.createdNode) setNewNodeId(res.createdNode.id);
       sync();
 
-      // Generation. The demo has no model attached; replies are scripted for
-      // the recorded sequence and templated otherwise, and say so.
-      const scripted = DEMO_STEPS.find((st) => st.message === text)?.reply;
-      const reply =
-        scripted ??
-        `(demo reply, no model connected) This turn was routed to “${res.activePath.join(' / ') || 'the project root'}”. ` +
-          `A model would see ${res.context!.tokens.total.toLocaleString()} tokens of working context here: ` +
-          `the path, ${res.context!.checkpoint ? 'its checkpoint, ' : ''}${res.context!.recentMessages.length} recent turns in this node, and your message.`;
+      // Generation: a live model when configured; otherwise scripted replies
+      // for the recorded sequence and a templated reply that says so.
       const id = `stream-${res.message.id}`;
       setStreaming({ id, nodeId: res.activeNodeId, text: '' });
-      await sleep(260);
-      const words = reply.split(/(\s+)/);
-      let acc = '';
-      for (let i = 0; i < words.length; i++) {
-        acc += words[i];
-        if (i % 2 === 0) {
-          setStreaming({ id, nodeId: res.activeNodeId, text: acc });
-          await sleep(16 + Math.random() * 18);
+      let reply = '';
+      const scripted = DEMO_STEPS.find((st) => st.message === text)?.reply;
+      if (liveReplies) {
+        try {
+          for await (const ev of streamChat({ system: res.context!.system, messages: res.context!.messages })) {
+            if (ev.type === 'delta') {
+              reply += ev.text;
+              setStreaming({ id, nodeId: res.activeNodeId, text: reply });
+            } else if (ev.type === 'done') {
+              const api: ApiUsage = { ...ev.usage, model: ev.model, ttftMs: ev.ttftMs, totalMs: ev.totalMs };
+              setCommitted((c) => (c && c.nodeId === res.activeNodeId ? { ...c, api } : c));
+            } else {
+              throw new Error(ev.message);
+            }
+          }
+        } catch (err) {
+          reply = `${reply}${reply ? '\n\n' : ''}(live reply failed: ${err instanceof Error ? err.message : String(err)})`;
+        }
+        if (!reply.trim()) reply = '(the model returned no text)';
+      } else {
+        reply =
+          scripted ??
+          `(demo reply, no model connected) This turn was routed to “${res.activePath.join(' / ') || 'the project root'}”. ` +
+            `A model would see ${res.context!.tokens.total.toLocaleString()} tokens of working context here: ` +
+            `the path, ${res.context!.checkpoint ? 'its checkpoint, ' : ''}${res.context!.recentMessages.length} recent turns in this node, and your message.`;
+        await sleep(260);
+        const words = reply.split(/(\s+)/);
+        let acc = '';
+        for (let i = 0; i < words.length; i++) {
+          acc += words[i];
+          if (i % 2 === 0) {
+            setStreaming({ id, nodeId: res.activeNodeId, text: acc });
+            await sleep(16 + Math.random() * 18);
+          }
         }
       }
       await s.add({ role: 'assistant', content: reply });
@@ -148,7 +187,7 @@ export function useContextTreeDemo(demoMode: boolean) {
       sync();
       setBusy(false);
     },
-    [busy, sync],
+    [busy, sync, liveReplies],
   );
 
   const typeOut = useCallback(async (text: string) => {
@@ -231,6 +270,7 @@ export function useContextTreeDemo(demoMode: boolean) {
     busy,
     send,
     demo: { steps: DEMO_STEPS, stepIndex, playing, play, stop, reset },
-    backendName: router.backend.name,
+    live,
+    liveReplies,
   };
 }

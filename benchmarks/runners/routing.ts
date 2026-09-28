@@ -50,9 +50,10 @@ interface CaseResult {
   actionCorrect: boolean;
   latencyMs: number;
   requestTokens: number;
+  fallback: string | null;
 }
 
-async function runRouter(name: string, make: () => Router) {
+export async function runRouter(name: string, make: () => Router) {
   const results: CaseResult[] = [];
   for (const c of CASES) {
     const router = make();
@@ -76,6 +77,7 @@ async function runRouter(name: string, make: () => Router) {
       actionCorrect: action === c.expect.action,
       latencyMs: r.decision!.latencyMs ?? 0,
       requestTokens,
+      fallback: r.decision!.fallbackReason ?? null,
     });
   }
 
@@ -100,6 +102,7 @@ async function runRouter(name: string, make: () => Router) {
       latencyP50Ms: percentile(results.map((r) => r.latencyMs), 50),
       latencyP95Ms: percentile(results.map((r) => r.latencyMs), 95),
       meanRequestTokens: mean(results.map((r) => r.requestTokens)),
+      fallbacks: results.filter((r) => r.fallback).length,
     },
     byCategory: Object.fromEntries(
       categories.map((cat) => {
@@ -111,19 +114,11 @@ async function runRouter(name: string, make: () => Router) {
   };
 }
 
-export async function runRoutingBenchmark() {
-  const routers: Array<[string, () => Router]> = [
-    ['Always STAY', () => new StayRouter()],
-    ['MockRouter (lexical)', () => new MockRouter()],
-    ['JevRouter (local reference backend)', () => new JevRouter()],
-  ];
-  const runs = [];
-  for (const [name, make] of routers) runs.push(await runRouter(name, make));
+export type RouterRun = Awaited<ReturnType<typeof runRouter>>;
 
+export function routingTable(runs: RouterRun[], latencyDigits = 2): string {
   const m = (x: number | null) => fmtPct(x, 0);
-  const md = [
-    `### Benchmark E — Routing (${CASES.length} hand-labelled cases, ${TREES.length} trees)`,
-    '',
+  return [
     mdTable(
       ['Router', 'STAY acc', 'SWITCH acc', 'FORK prec', 'FORK recall', 'FORK parent', 'Target acc (strict)', 'Target acc (lenient)', 'p50 / p95 latency'],
       runs.map((r) => [
@@ -135,7 +130,7 @@ export async function runRoutingBenchmark() {
         m(r.metrics.forkParentAccuracy),
         m(r.metrics.targetAccuracyStrict),
         m(r.metrics.targetAccuracyLenient),
-        `${r.metrics.latencyP50Ms.toFixed(2)} / ${r.metrics.latencyP95Ms.toFixed(2)} ms`,
+        `${r.metrics.latencyP50Ms.toFixed(latencyDigits)} / ${r.metrics.latencyP95Ms.toFixed(latencyDigits)} ms`,
       ]),
     ),
     '',
@@ -145,6 +140,31 @@ export async function runRoutingBenchmark() {
       ['Router', ...Object.keys(runs[0]!.byCategory)],
       runs.map((r) => [r.router, ...Object.values(r.byCategory).map((c) => `${m(c.strict)} (n=${c.n})`)]),
     ),
+  ].join('\n');
+}
+
+export function printFailures(run: RouterRun) {
+  console.log(`\n${run.router} failures (${run.failures.length}):`);
+  for (const f of run.failures) {
+    console.log(
+      `  ${f.id} [${f.category}] expected ${JSON.stringify(f.expected)} got ${f.action} → ${f.active}${f.parent ? ` (parent ${f.parent})` : ''}${f.fallback ? ` [fallback: ${f.fallback}]` : ''}`,
+    );
+  }
+}
+
+export async function runRoutingBenchmark() {
+  const routers: Array<[string, () => Router]> = [
+    ['Always STAY', () => new StayRouter()],
+    ['MockRouter (lexical)', () => new MockRouter()],
+    ['JevRouter (local reference backend)', () => new JevRouter()],
+  ];
+  const runs = [];
+  for (const [name, make] of routers) runs.push(await runRouter(name, make));
+
+  const md = [
+    `### Benchmark E — Routing (${CASES.length} hand-labelled cases, ${TREES.length} trees)`,
+    '',
+    routingTable(runs),
     '',
     `Routing cost: the local backend runs in-process ($0). A hosted Jev model would receive ~${Math.round(runs[2]!.metrics.meanRequestTokens)} tokens per request on average (estimated from the serialized JevRequest).`,
     'Latency is in-process wall time on the benchmark machine and does not include network time to a hosted model.',
@@ -157,7 +177,5 @@ export async function runRoutingBenchmark() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const { md, runs } = await runRoutingBenchmark();
   console.log(md);
-  const jev = runs[runs.length - 1]!;
-  console.log(`\nJev failures (${jev.failures.length}):`);
-  for (const f of jev.failures) console.log(`  ${f.id} [${f.category}] expected ${JSON.stringify(f.expected)} got ${f.action} → ${f.active}${f.parent ? ` (parent ${f.parent})` : ''}`);
+  printFailures(runs[runs.length - 1]!);
 }

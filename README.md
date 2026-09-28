@@ -42,14 +42,30 @@ pnpm test
 pnpm bench          # regenerates benchmarks/results/RESULTS.md
 ```
 
-Requires Node 20+ and pnpm. No API keys needed. The demo, tests and benchmarks run locally and deterministically.
+Requires Node 20+ and pnpm. No API keys needed: without keys, the demo, tests and benchmarks run locally and deterministically on Jev's local reference backend.
+
+### Live mode (optional)
+
+```bash
+cp .env.example .env.local   # add AI_GATEWAY_API_KEY and/or ANTHROPIC_API_KEY
+pnpm jev:check               # one live Jev call, printed verbatim
+pnpm dev                     # the header shows JEV · typesafe-ai/jev and LLM · <model>
+```
+
+| Key | Enables |
+| --- | --- |
+| `AI_GATEWAY_API_KEY` | real Jev ([`typesafe-ai/jev`](https://vercel.com/ai-gateway/models) on the Vercel AI Gateway) for routing in the demo, `pnpm jev:check`, `pnpm bench:jev` |
+| `ANTHROPIC_API_KEY` | live Claude replies in free-chat mode (`?demo=true&live=true` for the scripted demo too) with measured input, cache and TTFT in the inspector; `pnpm bench:llm` |
+
+Keys stay in the Vite dev server (`apps/demo/server/api.ts`); the browser never sees them. A typing-time preview that matches the sent text is reused on send, so each message costs one Jev call.
 
 ```ts
 import { createContextTree } from '@context-tree/core';
 import { JevRouter } from '@context-tree/jev';
+import { GatewayJevBackend } from '@context-tree/jev/gateway'; // server-side
 
 const tree = createContextTree({
-  router: new JevRouter(),
+  router: new JevRouter({ backend: new GatewayJevBackend() }), // omit backend for the local reference scorer
   root: 'My project',
 });
 
@@ -97,7 +113,7 @@ How to read this honestly:
 - These are **context-level** measurements. They check whether the right fact (and no conflicting fact) is in what the model would see, not what the model answers. `pnpm bench:llm` grades real answers with an API key; it has **not been run yet**, so there are no answer-accuracy, TTFT or measured-cache numbers here.
 - Token counts are estimates (≈4 characters per token). Cache costs are **simulated** from Anthropic's documented caching rules (Claude Opus 5 prices).
 - The conversations are synthetic. Vector retrieval does well on topic return because the question names the topic; it fails on collision because it pulls every "we decided the database is…" line.
-- The gap between "Context Tree + Jev" and "oracle routing" is routing error. The local reference backend was iterated on while these fixtures were visible, so treat the routing numbers as a development score, not a held-out result.
+- The gap between "Context Tree + Jev" and "oracle routing" is routing error. All routing numbers above are from Jev's **local reference backend**, which was iterated on while these fixtures were visible, so treat them as a development score. `pnpm bench:jev` scores real `typesafe-ai/jev` on the same fixtures as a held-out result; it has **not been run yet**.
 
 ## Architecture
 

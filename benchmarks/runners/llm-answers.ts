@@ -14,6 +14,7 @@
  * models mid-run and break the "same model" rule. Refusals are counted as
  * wrong and reported.
  */
+import '../../scripts/load-env.ts';
 import Anthropic from '@anthropic-ai/sdk';
 import { TOPICS, topic } from '../datasets/conversations.ts';
 import { collisionCases, topicReturnCases, type Case } from './context.ts';

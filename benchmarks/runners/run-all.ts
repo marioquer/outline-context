@@ -16,12 +16,21 @@ const routing = await runRoutingBenchmark();
 const context = await runContextBenchmarks();
 const switching = await runSwitchingBenchmark();
 
-let llm = '';
-try {
-  llm = readFileSync(join(RESULTS_DIR, 'llm-answers.md'), 'utf8');
-} catch {
-  llm = '### LLM-graded answers\n\nNot run yet. Run `ANTHROPIC_API_KEY=... pnpm bench:llm` to grade real model answers.';
-}
+const optional = (file: string, fallback: string) => {
+  try {
+    return readFileSync(join(RESULTS_DIR, file), 'utf8');
+  } catch {
+    return fallback;
+  }
+};
+const jev = optional(
+  'routing-jev.md',
+  '### Benchmark E — Routing with real Jev\n\nNot run yet. Run `AI_GATEWAY_API_KEY=... pnpm bench:jev` to score typesafe-ai/jev on the same fixtures.',
+);
+const llm = optional(
+  'llm-answers.md',
+  '### LLM-graded answers\n\nNot run yet. Run `ANTHROPIC_API_KEY=... pnpm bench:llm` to grade real model answers.',
+);
 
 const doc = [
   '# Benchmark results',
@@ -35,6 +44,8 @@ const doc = [
   switching.md,
   '',
   routing.md,
+  '',
+  jev,
   '',
   llm,
   '',

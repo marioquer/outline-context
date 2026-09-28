@@ -207,7 +207,6 @@ export function Inspector(props: {
   committed: Committed | null;
   preview: Preview | null;
   newNodeId: NodeId | null;
-  backendName: string;
 }) {
   return (
     <section className="panel" aria-label="Context inspector">
@@ -316,17 +315,7 @@ function TreeView({
   );
 }
 
-function JevPanel({
-  tree,
-  committed,
-  preview,
-  backendName,
-}: {
-  tree: ContextTree;
-  committed: Committed | null;
-  preview: Preview | null;
-  backendName: string;
-}) {
+function JevPanel({ tree, committed, preview }: { tree: ContextTree; committed: Committed | null; preview: Preview | null }) {
   const decision = preview?.decision ?? committed?.decision ?? null;
   const state = preview ? 'preview' : committed ? 'committed' : 'idle';
 
@@ -386,9 +375,12 @@ function JevPanel({
             <span>
               <b>{scores.length - 1}</b> candidates
             </span>
-            <span>{decision.source ?? `jev:${backendName}`}</span>
+            <span>{decision.source ?? 'jev'}</span>
           </div>
-          {decision.fallbackReason && <div className="note">Fallback: {decision.fallbackReason}</div>}
+          {decision.reusedPreview && state === 'committed' && (
+            <div className="note">Decided while you were typing: the send reused the preview, so no second call.</div>
+          )}
+          {decision.fallbackReason && <div className="note warn">Fallback used: {decision.fallbackReason}</div>}
         </>
       ) : (
         <div className="jev-empty">Start typing. Jev predicts the context before you send.</div>
@@ -452,11 +444,44 @@ function Metrics({ committed, preview }: { committed: Committed | null; preview:
             </span>
           </div>
           <div className="note">Token counts are estimates (≈4 characters per token), computed live from the messages on screen.</div>
+          {!preview && committed?.api && <ApiMetrics api={committed.api} />}
         </>
       ) : (
         <div className="jev-empty">Send a message to measure its working context.</div>
       )}
     </div>
+  );
+}
+
+function ApiMetrics({ api }: { api: NonNullable<Committed['api']> }) {
+  const total = api.input + api.cacheRead + api.cacheWrite;
+  return (
+    <>
+      <div className="cand-label" style={{ marginTop: 12 }}>
+        Measured by the API · {api.model}
+      </div>
+      <div className="metric">
+        <span className="metric-l">Input</span>
+        <span className="metric-v">
+          {fmt(total)}
+          <small>tokens</small>
+        </span>
+      </div>
+      <div className="metric">
+        <span className="metric-l">Cached / written / uncached</span>
+        <span className="metric-v">
+          {fmt(api.cacheRead)} / {fmt(api.cacheWrite)} / {fmt(api.input)}
+        </span>
+      </div>
+      <div className="metric">
+        <span className="metric-l">TTFT · total</span>
+        <span className="metric-v">
+          {fmt(api.ttftMs)}
+          <small>ms</small> · {fmt(api.totalMs)}
+          <small>ms</small>
+        </span>
+      </div>
+    </>
   );
 }
 

@@ -19,7 +19,9 @@
     "bench:routing": "tsx benchmarks/runners/routing.ts",
     "bench:context": "tsx benchmarks/runners/context.ts",
     "bench:switching": "tsx benchmarks/runners/switching.ts",
-    "bench:llm": "tsx benchmarks/runners/llm-answers.ts"
+    "bench:llm": "tsx benchmarks/runners/llm-answers.ts",
+    "bench:jev": "tsx benchmarks/runners/routing-jev.ts",
+    "jev:check": "tsx scripts/jev-check.ts"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

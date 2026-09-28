@@ -186,6 +186,23 @@ button {
   padding: 0;
   justify-content: center;
 }
+.engine-chip {
+  font: 600 9.5px/1 var(--mono);
+  letter-spacing: 0.06em;
+  padding: 5px 7px;
+  border-radius: 5px;
+  color: var(--ink-4);
+  border: 0.5px dashed var(--hairline-strong);
+  white-space: nowrap;
+}
+.engine-chip[data-live='true'] {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border: 0.5px solid transparent;
+}
+.note.warn {
+  color: var(--accent-ink);
+}
 .demo-step-label {
   font: 500 11px/1 var(--mono);
   color: var(--ink-4);
@@ -775,6 +792,16 @@ button {
   font: 500 11px/1 var(--mono);
   color: var(--ink-4);
 }
+.jev-foot span {
+  white-space: nowrap;
+}
+.jev-foot span:last-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
 .jev-foot b {
   color: var(--ink-2);
   font-weight: 500;
@@ -1002,6 +1029,7 @@ button {
     padding: 10px 16px;
   }
   .demo-step-label,
+  .engine-chip,
   .panel-sub {
     display: none;
   }

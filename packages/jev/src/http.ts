@@ -31,7 +31,16 @@ export class HttpJevBackend implements JevBackend {
       body: JSON.stringify(request),
       ...(signal ? { signal } : {}),
     });
-    if (!res.ok) throw new Error(`Jev HTTP ${res.status}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      let detail = body;
+      try {
+        detail = (JSON.parse(body) as { error?: string }).error ?? body;
+      } catch {
+        /* not JSON */
+      }
+      throw new Error(`Jev HTTP ${res.status}${detail ? `: ${detail.slice(0, 200)}` : ''}`);
+    }
     const body = (await res.json()) as Partial<JevResponse>;
     if (!Array.isArray(body.scores)) throw new Error('Jev response missing `scores`');
     return body as JevResponse;

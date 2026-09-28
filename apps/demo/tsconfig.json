@@ -2,12 +2,27 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "types": ["vite/client"],
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "paths": {
-      "@context-tree/core": ["../../packages/core/src/index.ts"],
-      "@context-tree/jev": ["../../packages/jev/src/index.ts"]
+      "@context-tree/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@context-tree/jev": [
+        "../../packages/jev/src/index.ts"
+      ],
+      "@context-tree/jev/gateway": [
+        "../../packages/jev/src/gateway.ts"
+      ]
     }
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": [
+    "src",
+    "server"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
 }

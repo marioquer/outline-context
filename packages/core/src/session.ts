@@ -112,6 +112,7 @@ export class ContextTreeSession {
   private readonly checkpointPolicy: CheckpointPolicy | false;
   private readonly system: string | undefined;
   private readonly tokenCounter: TokenCounter | undefined;
+  private lastPreview: { content: string; revision: string; decision: RouteDecision; candidates: NodeId[] } | null = null;
 
   constructor(opts: ContextTreeOptions) {
     this.router = opts.router;
@@ -184,7 +185,13 @@ export class ContextTreeSession {
   /** Route a draft message without committing anything. For typing-time preview. */
   async preview(content: string, signal?: AbortSignal): Promise<PreviewResult> {
     const message = this.makeMessage({ role: 'user', content });
+    const revision = this.revision();
     const { decision, candidates } = await this.routeMessage(message, signal);
+    // Remember it: if the user sends exactly this text before the tree changes,
+    // the commit reuses the decision instead of routing again.
+    if (!decision.fallbackReason && revision === this.revision()) {
+      this.lastPreview = { content, revision, decision: structuredClone(decision), candidates };
+    }
     return {
       decision,
       predictedNodeId: decision.action === 'fork' ? null : (decision.targetNodeId ?? this.activeNodeId),
@@ -202,7 +209,7 @@ export class ContextTreeSession {
       return { message, activeNodeId: this.activeNodeId, activePath: this.path() };
     }
 
-    const { decision, candidates } = await this.routeMessage(message);
+    const { decision, candidates } = await this.routeOrReusePreview(message);
     let createdNode: ContextNode | undefined;
     let target: NodeId;
 
@@ -271,6 +278,27 @@ export class ContextTreeSession {
   private commit(nodeId: NodeId, message: ContextMessage) {
     this.tree = appendMessage(this.tree, nodeId, message);
     this.transcript = [...this.transcript, { ...message, nodeId }];
+  }
+
+  /**
+   * Cheap fingerprint of everything routing depends on: the active pointer,
+   * the set of nodes, and each node's delta and checkpoint version.
+   */
+  private revision(): string {
+    const parts = [this.tree.activeNodeId ?? ''];
+    for (const n of Object.values(this.tree.nodes)) {
+      parts.push(`${n.id}:${n.recentMessages.length}:${n.checkpoint?.version ?? 0}:${n.lastActiveAt}`);
+    }
+    return parts.join('|');
+  }
+
+  private async routeOrReusePreview(message: ContextMessage): Promise<{ decision: RouteDecision; candidates: NodeId[] }> {
+    const p = this.lastPreview;
+    this.lastPreview = null;
+    if (p && p.content === message.content && p.revision === this.revision()) {
+      return { decision: { ...structuredClone(p.decision), reusedPreview: true }, candidates: p.candidates };
+    }
+    return this.routeMessage(message);
   }
 
   private async routeMessage(

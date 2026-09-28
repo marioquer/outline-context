@@ -15,7 +15,8 @@
     "noEmit": true,
     "paths": {
       "@context-tree/core": ["./packages/core/src/index.ts"],
-      "@context-tree/jev": ["./packages/jev/src/index.ts"]
+      "@context-tree/jev": ["./packages/jev/src/index.ts"],
+      "@context-tree/jev/gateway": ["./packages/jev/src/gateway.ts"]
     }
   }
 }

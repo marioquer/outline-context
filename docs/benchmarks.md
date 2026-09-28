@@ -5,8 +5,13 @@ pnpm bench            # A, B, C, D, E → benchmarks/results/*.json, *.md, RESUL
 pnpm bench:routing    # E only
 pnpm bench:context    # A, B, D
 pnpm bench:switching  # C
+AI_GATEWAY_API_KEY=… pnpm bench:jev  # opt-in: E against real typesafe-ai/jev (57 calls, ~2 min)
 ANTHROPIC_API_KEY=… pnpm bench:llm   # opt-in, costs money: real answers for A and B
 ```
+
+Keys can also go in `.env.local` at the repo root. `pnpm bench` includes the opt-in results in `RESULTS.md` once they exist.
+
+`bench:jev` scores real Jev on exactly the same fixtures and scoring as the local backend. Failed calls are not silently replaced: StayRouter decides, the case is scored as that, and the fallback count is printed next to the scores. Unlike the local backend, Jev was never tuned against these fixtures, so its numbers are a held-out result.
 
 Results are written by the runners, never edited by hand. Each JSON file records the git commit, date and Node version.
 
