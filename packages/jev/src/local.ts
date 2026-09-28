@@ -22,6 +22,8 @@ export interface LocalJevWeights {
   forkCue: number;
   /** IDF-weighted share of message terms that appear nowhere in the candidates. */
   forkNovelty: number;
+  /** The message names something (a capitalized name) the tree has never seen. */
+  newEntity: number;
 }
 
 export const DEFAULT_LOCAL_WEIGHTS: LocalJevWeights = {
@@ -34,6 +36,7 @@ export const DEFAULT_LOCAL_WEIGHTS: LocalJevWeights = {
   forkBase: -2.6,
   forkCue: 3.4,
   forkNovelty: 2.4,
+  newEntity: 2.4,
 };
 
 const RETURN_CUE = /\b(back to|return(?:ing)? to|go(?:ing)? back|revisit|circl(?:e|ing) back|switch(?:ing)? (?:back )?to|re:|regarding|about the)\b/i;
@@ -67,18 +70,26 @@ export class LocalJevBackend implements JevBackend {
     for (const d of docs) for (const t of d) df.set(t, (df.get(t) ?? 0) + 1);
     const idf = (t: string) => Math.log(1 + (N + 1) / ((df.get(t) ?? 0) + 0.5));
     const qWeight = q.reduce((a, t) => a + idf(t), 0) || 1;
+    // Terms shared by most candidates ("project", "test first") are structure,
+    // not evidence for any one node.
+    const generic = (t: string, freq: Map<string, number>) => N >= 4 && (freq.get(t) ?? 0) > N * 0.4;
+    const titleDf = new Map<string, number>();
+    for (const c of req.candidates) for (const t of new Set(tokenize(c.title))) titleDf.set(t, (titleDf.get(t) ?? 0) + 1);
 
     const [qv, ...dv] = await this.embedder.embed([req.message, ...req.candidates.map(profile)]);
 
     const returnCue = RETURN_CUE.test(req.message);
+    // A capitalized name that appears nowhere in the tree ("Project Borealis",
+    // "SOC 2") usually introduces a new durable subject.
+    const newEntity = namesIn(req.message).some((n) => !df.has(n));
     const continuationCue = CONTINUATION_CUE.test(req.message.trim()) && q.length <= 8;
 
     const feats = req.candidates.map((c, i) => {
       const doc = docs[i]!;
       let lex = 0;
-      for (const t of q) if (doc.has(t)) lex += idf(t);
+      for (const t of q) if (doc.has(t) && !generic(t, df)) lex += idf(t);
       lex /= qWeight;
-      const own = [...new Set(tokenize(c.title))];
+      const own = [...new Set(tokenize(c.title))].filter((t) => !generic(t, titleDf));
       const titleHit = own.length ? own.filter((t) => q.includes(t)).length / own.length : 0;
       // Ancestors named in the message ("the OSS router") also point at this node,
       // so a specific child can beat the parent it lives under.
@@ -98,7 +109,7 @@ export class LocalJevBackend implements JevBackend {
       let logit = w.lexical * lex + w.title * titleHit + w.path * pathHit + w.semantic * sem;
       if (c.relation === 'current') {
         let prior = w.stay;
-        if (returnCue && titleHit === 0) prior = 0;
+        if ((returnCue || newEntity) && titleHit === 0) prior = 0;
         else if (someoneElseNamed && titleHit === 0) prior *= 0.5;
         if (continuationCue && !someoneElseNamed) prior += w.continuation;
         logit += prior;
@@ -112,12 +123,19 @@ export class LocalJevBackend implements JevBackend {
     let unseen = 0;
     for (const t of q) if (!df.has(t)) unseen += idf(t);
     const novelty = unseen / qWeight;
-    let forkLogit = w.forkBase + (FORK_CUE.test(req.message) ? w.forkCue : 0) + w.forkNovelty * novelty;
+    let forkLogit =
+      w.forkBase +
+      (FORK_CUE.test(req.message) ? w.forkCue : 0) +
+      w.forkNovelty * novelty +
+      (newEntity ? w.newEntity : 0);
     if (q.length < 4) forkLogit -= 2; // too short to be a durable new context
     if (returnCue) forkLogit -= 1.5;
 
     // The new node attaches under the candidate it relates to most, if it has room.
-    const parent = feats
+    // A new named subject attaches under a node the message names, else the root.
+    const named = feats.filter((f) => f.titleHit >= 0.5 || f.pathHit > 0);
+    const pool = newEntity ? (named.length ? named : feats.filter((f) => f.c.depth === 0)) : feats;
+    const parent = pool
       .filter((f) => f.c.depth < req.maxDepth)
       .map((f) => ({
         id: f.c.id,
@@ -131,6 +149,23 @@ export class LocalJevBackend implements JevBackend {
       model: 'local-reference-v0',
     };
   }
+}
+
+const NOT_NAMES = new Set(['i', "i'm", "i'll", 'ok', 'okay', 'new', 'back', 'also', 'separately', 'project']);
+
+/** Stems of capitalized words that are not sentence-initial. */
+function namesIn(text: string): string[] {
+  const out: string[] = [];
+  // Capitalized words only: acronyms ("CSV", "API") are usually technical terms, not new subjects.
+  const re = /(^|[.!?:;—–-]\s*|\s)([A-Z][\p{Ll}][\p{Letter}\p{Number}]+)/gu;
+  for (const m of text.matchAll(re)) {
+    const sentenceStart = m.index === 0 || /[.!?:;—–-]/.test(m[1] ?? '');
+    if (sentenceStart) continue;
+    const word = m[2]!.toLowerCase();
+    if (NOT_NAMES.has(word)) continue;
+    out.push(...tokenize(word));
+  }
+  return out;
 }
 
 function profile(c: JevCandidate): string {

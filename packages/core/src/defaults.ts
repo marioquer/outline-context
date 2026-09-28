@@ -1,6 +1,11 @@
 import { firstSentence } from './text.ts';
 import type { ContextCheckpoint, ContextMessage, ContextNode, Summarizer, Titler } from './types.ts';
 
+function clip(text: string, max: number): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+}
+
 const TITLE_SKIP = new Set(
   (
     'a an and are as at be but by can could did do does for from had has have how i if in into is it its ' +
@@ -8,7 +13,7 @@ const TITLE_SKIP = new Set(
     'was we were what when where which who why will with would you your about just also now ok okay ' +
     'specifically test testing look looking talk talking discuss discussing consider considering think ' +
     'start starting new topic separately maybe need want wanna gonna go going back again during whether ' +
-    'figure out deep dive into open question track'
+    'figure out deep dive into open question track plan planning thread first'
   ).split(/\s+/),
 );
 
@@ -71,9 +76,10 @@ export class ExtractiveSummarizer implements Summarizer {
       const m = messages[i]!;
       if (m.role !== 'user') continue;
       const reply = messages[i + 1]?.role === 'assistant' ? messages[i + 1]!.content : '';
-      const line = reply
-        ? `- ${firstSentence(m.content, 140)} → ${firstSentence(reply, 160)}`
-        : `- ${firstSentence(m.content, 200)}`;
+      // Users state decisions and facts, so their turns are kept (nearly)
+      // verbatim; replies are reduced to their first sentence.
+      const said = clip(m.content, 280);
+      const line = reply ? `- ${said} → ${firstSentence(reply, 160)}` : `- ${said}`;
       lines.push(line);
     }
     return lines.slice(-this.maxLines).join('\n');
