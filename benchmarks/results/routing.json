@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generatedAt": "2026-09-28T06:02:33.063Z",
-    "commit": "f6a9b91",
+    "generatedAt": "2026-09-28T06:32:33.092Z",
+    "commit": "a8afb97",
     "node": "v22.22.2"
   },
   "runs": [
@@ -19,7 +19,8 @@
         "targetAccuracyLenient": 0.42105263157894735,
         "latencyP50Ms": 0,
         "latencyP95Ms": 0,
-        "meanRequestTokens": 605.8421052631579
+        "meanRequestTokens": 605.8421052631579,
+        "fallbacks": 0
       },
       "byCategory": {
         "continuation": {
@@ -61,7 +62,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 698
+          "requestTokens": 698,
+          "fallback": null
         },
         {
           "id": "s02",
@@ -76,7 +78,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 690
+          "requestTokens": 690,
+          "fallback": null
         },
         {
           "id": "s03",
@@ -91,7 +94,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 694
+          "requestTokens": 694,
+          "fallback": null
         },
         {
           "id": "s04",
@@ -106,7 +110,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 694
+          "requestTokens": 694,
+          "fallback": null
         },
         {
           "id": "s05",
@@ -121,7 +126,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 498
+          "requestTokens": 498,
+          "fallback": null
         },
         {
           "id": "s06",
@@ -136,7 +142,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 492
+          "requestTokens": 492,
+          "fallback": null
         },
         {
           "id": "s07",
@@ -151,7 +158,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 493
+          "requestTokens": 493,
+          "fallback": null
         },
         {
           "id": "s08",
@@ -166,7 +174,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 695
+          "requestTokens": 695,
+          "fallback": null
         },
         {
           "id": "s09",
@@ -181,7 +190,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 690
+          "requestTokens": 690,
+          "fallback": null
         },
         {
           "id": "s10",
@@ -196,7 +206,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 499
+          "requestTokens": 499,
+          "fallback": null
         },
         {
           "id": "r01",
@@ -211,7 +222,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 693
+          "requestTokens": 693,
+          "fallback": null
         },
         {
           "id": "r02",
@@ -226,7 +238,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 697
+          "requestTokens": 697,
+          "fallback": null
         },
         {
           "id": "r03",
@@ -241,7 +254,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 494
+          "requestTokens": 494,
+          "fallback": null
         },
         {
           "id": "r04",
@@ -256,7 +270,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 495
+          "requestTokens": 495,
+          "fallback": null
         },
         {
           "id": "r05",
@@ -271,7 +286,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 694
+          "requestTokens": 694,
+          "fallback": null
         },
         {
           "id": "r06",
@@ -286,7 +302,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 488
+          "requestTokens": 488,
+          "fallback": null
         },
         {
           "id": "r07",
@@ -301,7 +318,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 695
+          "requestTokens": 695,
+          "fallback": null
         },
         {
           "id": "r08",
@@ -316,7 +334,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 495
+          "requestTokens": 495,
+          "fallback": null
         },
         {
           "id": "f01",
@@ -334,7 +353,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 701
+          "requestTokens": 701,
+          "fallback": null
         },
         {
           "id": "f02",
@@ -352,7 +372,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 701
+          "requestTokens": 701,
+          "fallback": null
         },
         {
           "id": "f03",
@@ -370,7 +391,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 693
+          "requestTokens": 693,
+          "fallback": null
         },
         {
           "id": "f04",
@@ -388,7 +410,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 691
+          "requestTokens": 691,
+          "fallback": null
         },
         {
           "id": "f05",
@@ -406,7 +429,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 504
+          "requestTokens": 504,
+          "fallback": null
         },
         {
           "id": "f06",
@@ -424,7 +448,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 507
+          "requestTokens": 507,
+          "fallback": null
         },
         {
           "id": "f07",
@@ -441,7 +466,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 493
+          "requestTokens": 493,
+          "fallback": null
         },
         {
           "id": "f08",
@@ -458,7 +484,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 497
+          "requestTokens": 497,
+          "fallback": null
         },
         {
           "id": "f09",
@@ -477,7 +504,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 694
+          "requestTokens": 694,
+          "fallback": null
         },
         {
           "id": "f10",
@@ -495,7 +523,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 491
+          "requestTokens": 491,
+          "fallback": null
         },
         {
           "id": "n03",
@@ -510,7 +539,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 697
+          "requestTokens": 697,
+          "fallback": null
         },
         {
           "id": "n04",
@@ -525,7 +555,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 693
+          "requestTokens": 693,
+          "fallback": null
         },
         {
           "id": "n05",
@@ -540,7 +571,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 495
+          "requestTokens": 495,
+          "fallback": null
         },
         {
           "id": "n06",
@@ -555,7 +587,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 496
+          "requestTokens": 496,
+          "fallback": null
         },
         {
           "id": "n07",
@@ -570,7 +603,8 @@
           "lenient": false,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 487
+          "requestTokens": 487,
+          "fallback": null
         },
         {
           "id": "n08",
@@ -585,7 +619,8 @@
           "lenient": true,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 491
+          "requestTokens": 491,
+          "fallback": null
         },
         {
           "id": "a02",
@@ -600,7 +635,8 @@
           "lenient": true,
           "actionCorrect": false,
           "latencyMs": 0,
-          "requestTokens": 688
+          "requestTokens": 688,
+          "fallback": null
         }
       ]
     },
@@ -616,9 +652,10 @@
         "actionAccuracy": 0.7543859649122807,
         "targetAccuracyStrict": 0.7017543859649122,
         "targetAccuracyLenient": 0.7017543859649122,
-        "latencyP50Ms": 0.15239299999996092,
-        "latencyP95Ms": 0.6365680000000111,
-        "meanRequestTokens": 605.8421052631579
+        "latencyP50Ms": 0.15172800000004827,
+        "latencyP95Ms": 0.7279430000000389,
+        "meanRequestTokens": 605.8421052631579,
+        "fallbacks": 0
       },
       "byCategory": {
         "continuation": {
@@ -659,8 +696,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.2965550000000121,
-          "requestTokens": 693
+          "latencyMs": 0.2929420000000391,
+          "requestTokens": 693,
+          "fallback": null
         },
         {
           "id": "c07",
@@ -674,8 +712,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.31484199999999873,
-          "requestTokens": 686
+          "latencyMs": 0.34079900000000407,
+          "requestTokens": 686,
+          "fallback": null
         },
         {
           "id": "c09",
@@ -689,8 +728,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.28390699999999924,
-          "requestTokens": 492
+          "latencyMs": 0.2316500000000019,
+          "requestTokens": 492,
+          "fallback": null
         },
         {
           "id": "c13",
@@ -700,13 +740,14 @@
             "target": "auth"
           },
           "action": "fork",
-          "active": "n_mukuc0pzuvtfq25q",
+          "active": "n_mukvelmuuvrennh9",
           "parent": "auth",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.25952499999999645,
-          "requestTokens": 696
+          "latencyMs": 0.21305300000000216,
+          "requestTokens": 696,
+          "fallback": null
         },
         {
           "id": "c14",
@@ -716,13 +757,14 @@
             "target": "plot"
           },
           "action": "fork",
-          "active": "n_mukuc0q0v9o58lp9",
+          "active": "n_mukvelmvv9k585qi",
           "parent": "plot",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.11115200000000414,
-          "requestTokens": 484
+          "latencyMs": 0.20736400000004096,
+          "requestTokens": 484,
+          "fallback": null
         },
         {
           "id": "f01",
@@ -739,8 +781,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.12038799999999128,
-          "requestTokens": 701
+          "latencyMs": 0.17958099999998467,
+          "requestTokens": 701,
+          "fallback": null
         },
         {
           "id": "f03",
@@ -757,8 +800,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.10913699999997561,
-          "requestTokens": 693
+          "latencyMs": 0.12172200000003386,
+          "requestTokens": 693,
+          "fallback": null
         },
         {
           "id": "f05",
@@ -775,8 +819,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.2006139999999732,
-          "requestTokens": 504
+          "latencyMs": 0.16743999999999915,
+          "requestTokens": 504,
+          "fallback": null
         },
         {
           "id": "f06",
@@ -793,8 +838,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.08581399999997075,
-          "requestTokens": 507
+          "latencyMs": 0.08085599999998294,
+          "requestTokens": 507,
+          "fallback": null
         },
         {
           "id": "f07",
@@ -810,8 +856,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.06990600000000313,
-          "requestTokens": 493
+          "latencyMs": 0.07282299999997122,
+          "requestTokens": 493,
+          "fallback": null
         },
         {
           "id": "f08",
@@ -823,13 +870,14 @@
             ]
           },
           "action": "fork",
-          "active": "n_mukuc0q916oc0i30n",
+          "active": "n_mukveln516o4jkaod",
           "parent": "cabinets",
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.07779399999998304,
-          "requestTokens": 497
+          "latencyMs": 0.2289779999999837,
+          "requestTokens": 497,
+          "fallback": null
         },
         {
           "id": "f10",
@@ -842,13 +890,14 @@
             ]
           },
           "action": "fork",
-          "active": "n_mukuc0q917l98aq7y",
+          "active": "n_mukveln517l5ni413",
           "parent": "plot",
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.09277099999997063,
-          "requestTokens": 491
+          "latencyMs": 0.08334700000000339,
+          "requestTokens": 491,
+          "fallback": null
         },
         {
           "id": "n07",
@@ -858,13 +907,14 @@
             "target": "plot"
           },
           "action": "fork",
-          "active": "n_mukuc0qb1apc3v1df",
+          "active": "n_mukveln71apdgenbb",
           "parent": "chars",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.07095999999995684,
-          "requestTokens": 487
+          "latencyMs": 0.06993599999998423,
+          "requestTokens": 487,
+          "fallback": null
         },
         {
           "id": "a02",
@@ -878,8 +928,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.13299699999998893,
-          "requestTokens": 688
+          "latencyMs": 0.11859700000002249,
+          "requestTokens": 688,
+          "fallback": null
         },
         {
           "id": "a04",
@@ -889,13 +940,14 @@
             "target": "eng"
           },
           "action": "fork",
-          "active": "n_mukuc0qd1dgsv06n9",
+          "active": "n_mukveln91dg5aby3x",
           "parent": "eng",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.13225199999999404,
-          "requestTokens": 687
+          "latencyMs": 0.25286199999999326,
+          "requestTokens": 687,
+          "fallback": null
         },
         {
           "id": "a05",
@@ -905,13 +957,14 @@
             "target": "fitness"
           },
           "action": "fork",
-          "active": "n_mukuc0qd1du64jr7m",
+          "active": "n_mukvelna1durjqswo",
           "parent": "fitness",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.06371599999999944,
-          "requestTokens": 483
+          "latencyMs": 0.06619699999998829,
+          "requestTokens": 483,
+          "fallback": null
         },
         {
           "id": "a06",
@@ -921,13 +974,14 @@
             "target": "auth"
           },
           "action": "fork",
-          "active": "n_mukuc0qd1edy131rw",
+          "active": "n_mukvelna1edvlkb2i",
           "parent": "auth",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.12691499999999678,
-          "requestTokens": 693
+          "latencyMs": 0.10042299999997795,
+          "requestTokens": 693,
+          "fallback": null
         }
       ]
     },
@@ -943,9 +997,10 @@
         "actionAccuracy": 0.9122807017543859,
         "targetAccuracyStrict": 0.8947368421052632,
         "targetAccuracyLenient": 0.9122807017543859,
-        "latencyP50Ms": 0.4513099999999781,
-        "latencyP95Ms": 1.6017099999999687,
-        "meanRequestTokens": 605.8421052631579
+        "latencyP50Ms": 0.41269199999999273,
+        "latencyP95Ms": 1.2799039999999877,
+        "meanRequestTokens": 605.8421052631579,
+        "fallbacks": 0
       },
       "byCategory": {
         "continuation": {
@@ -986,8 +1041,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.39199899999999843,
-          "requestTokens": 695
+          "latencyMs": 0.3584419999999682,
+          "requestTokens": 695,
+          "fallback": null
         },
         {
           "id": "f05",
@@ -1004,8 +1060,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.39510000000001355,
-          "requestTokens": 504
+          "latencyMs": 0.4605629999999792,
+          "requestTokens": 504,
+          "fallback": null
         },
         {
           "id": "f08",
@@ -1021,8 +1078,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.28508399999998346,
-          "requestTokens": 497
+          "latencyMs": 0.32011499999998705,
+          "requestTokens": 497,
+          "fallback": null
         },
         {
           "id": "f10",
@@ -1035,13 +1093,14 @@
             ]
           },
           "action": "fork",
-          "active": "n_mukuc0ri1wyuekmey",
+          "active": "n_mukvelo71wy9utrzu",
           "parent": "plot",
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.2782550000000015,
-          "requestTokens": 491
+          "latencyMs": 0.29660200000000714,
+          "requestTokens": 491,
+          "fallback": null
         },
         {
           "id": "n07",
@@ -1055,8 +1114,9 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.2832889999999679,
-          "requestTokens": 487
+          "latencyMs": 0.2628159999999866,
+          "requestTokens": 487,
+          "fallback": null
         },
         {
           "id": "n08",
@@ -1070,8 +1130,9 @@
           "strict": false,
           "lenient": true,
           "actionCorrect": false,
-          "latencyMs": 0.226854000000003,
-          "requestTokens": 491
+          "latencyMs": 0.45570300000002817,
+          "requestTokens": 491,
+          "fallback": null
         }
       ]
     }
