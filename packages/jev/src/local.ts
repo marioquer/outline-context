@@ -1,0 +1,142 @@
+import { HashingEmbedder, cosine, tokenize, type Embedder } from '@context-tree/core';
+import type { JevBackend, JevCandidate, JevRequest, JevResponse } from './protocol.ts';
+
+/**
+ * Weights for the reference scorer. Every term is on a logit scale.
+ */
+export interface LocalJevWeights {
+  /** IDF-weighted share of message terms found in the candidate profile. */
+  lexical: number;
+  /** Share of the candidate's own title terms that appear in the message. */
+  title: number;
+  /** Share of the candidate's ancestor titles named in the message. */
+  path: number;
+  /** Hashed-embedding cosine between message and candidate profile. */
+  semantic: number;
+  /** Continuation prior for the current node. */
+  stay: number;
+  /** Extra current-node prior for short follow-ups ("what about…", "and…"). */
+  continuation: number;
+  forkBase: number;
+  /** Explicit "new durable thread" phrasing ("specifically test…", "separately…"). */
+  forkCue: number;
+  /** IDF-weighted share of message terms that appear nowhere in the candidates. */
+  forkNovelty: number;
+}
+
+export const DEFAULT_LOCAL_WEIGHTS: LocalJevWeights = {
+  lexical: 3.2,
+  title: 3.0,
+  path: 1.2,
+  semantic: 2.0,
+  stay: 1.3,
+  continuation: 1.2,
+  forkBase: -2.6,
+  forkCue: 3.4,
+  forkNovelty: 2.4,
+};
+
+const RETURN_CUE = /\b(back to|return(?:ing)? to|go(?:ing)? back|revisit|circl(?:e|ing) back|switch(?:ing)? (?:back )?to|re:|regarding|about the)\b/i;
+const CONTINUATION_CUE =
+  /^(and|also|so|ok|okay|but|then|what about|how about|why|wait|right|hmm|follow[- ]up|same|that|this|it|they|those|can you|could you|go on|continue|more on|expand)\b/i;
+const FORK_CUE =
+  /\b(specifically|separately|separate (?:thread|topic|track)|new (?:topic|thread|workstream|track)|sub-?topic|deep[- ]dive|dig into|spin (?:off|up)|its own|dedicated|let'?s (?:start|open|kick off)|start (?:a|an) (?:new )?(?:thread|track|section))\b/i;
+
+/**
+ * In-process reference scorer that speaks the Jev protocol. It is
+ * deterministic and needs no network or model, so the demo and benchmarks run
+ * anywhere. A hosted Jev model plugs in through `HttpJevBackend` with no other
+ * changes.
+ */
+export class LocalJevBackend implements JevBackend {
+  readonly name = 'local';
+  private readonly w: LocalJevWeights;
+  private readonly embedder: Embedder;
+
+  constructor(opts: { weights?: Partial<LocalJevWeights>; embedder?: Embedder } = {}) {
+    this.w = { ...DEFAULT_LOCAL_WEIGHTS, ...opts.weights };
+    this.embedder = opts.embedder ?? new HashingEmbedder();
+  }
+
+  async route(req: JevRequest): Promise<JevResponse> {
+    const w = this.w;
+    const q = [...new Set(tokenize(req.message))];
+    const docs = req.candidates.map((c) => new Set(tokenize(profile(c))));
+    const N = docs.length;
+    const df = new Map<string, number>();
+    for (const d of docs) for (const t of d) df.set(t, (df.get(t) ?? 0) + 1);
+    const idf = (t: string) => Math.log(1 + (N + 1) / ((df.get(t) ?? 0) + 0.5));
+    const qWeight = q.reduce((a, t) => a + idf(t), 0) || 1;
+
+    const [qv, ...dv] = await this.embedder.embed([req.message, ...req.candidates.map(profile)]);
+
+    const returnCue = RETURN_CUE.test(req.message);
+    const continuationCue = CONTINUATION_CUE.test(req.message.trim()) && q.length <= 8;
+
+    const feats = req.candidates.map((c, i) => {
+      const doc = docs[i]!;
+      let lex = 0;
+      for (const t of q) if (doc.has(t)) lex += idf(t);
+      lex /= qWeight;
+      const own = [...new Set(tokenize(c.title))];
+      const titleHit = own.length ? own.filter((t) => q.includes(t)).length / own.length : 0;
+      // Ancestors named in the message ("the OSS router") also point at this node,
+      // so a specific child can beat the parent it lives under.
+      const ancestors = c.path.slice(1, -1);
+      const pathHit = ancestors.length
+        ? ancestors.filter((a) => {
+            const at = tokenize(a);
+            return at.length > 0 && at.every((t) => q.includes(t));
+          }).length / ancestors.length
+        : 0;
+      const sem = Math.max(0, cosine(qv ?? [], dv[i] ?? []));
+      return { c, lex, titleHit, pathHit, sem };
+    });
+
+    const someoneElseNamed = feats.some((f) => f.c.relation !== 'current' && f.titleHit > 0);
+    const scores = feats.map(({ c, lex, titleHit, pathHit, sem }) => {
+      let logit = w.lexical * lex + w.title * titleHit + w.path * pathHit + w.semantic * sem;
+      if (c.relation === 'current') {
+        let prior = w.stay;
+        if (returnCue && titleHit === 0) prior = 0;
+        else if (someoneElseNamed && titleHit === 0) prior *= 0.5;
+        if (continuationCue && !someoneElseNamed) prior += w.continuation;
+        logit += prior;
+      }
+      // The project root is a catch-all; it should only win when nothing else fits.
+      if (c.depth === 0) logit -= 0.6;
+      return { id: c.id, logit: round(logit) };
+    });
+
+    // FORK: explicit "new durable thread" phrasing plus terms the tree has never seen.
+    let unseen = 0;
+    for (const t of q) if (!df.has(t)) unseen += idf(t);
+    const novelty = unseen / qWeight;
+    let forkLogit = w.forkBase + (FORK_CUE.test(req.message) ? w.forkCue : 0) + w.forkNovelty * novelty;
+    if (q.length < 4) forkLogit -= 2; // too short to be a durable new context
+    if (returnCue) forkLogit -= 1.5;
+
+    // The new node attaches under the candidate it relates to most, if it has room.
+    const parent = feats
+      .filter((f) => f.c.depth < req.maxDepth)
+      .map((f) => ({
+        id: f.c.id,
+        s: f.lex + f.titleHit + f.sem + (f.c.relation === 'current' ? 0.25 : 0) - (f.c.depth === 0 ? 0.3 : 0),
+      }))
+      .sort((a, b) => b.s - a.s)[0];
+
+    return {
+      scores,
+      fork: { logit: round(forkLogit), ...(parent ? { parentId: parent.id } : {}) },
+      model: 'local-reference-v0',
+    };
+  }
+}
+
+function profile(c: JevCandidate): string {
+  return [c.path.join(' '), c.title, c.summary, ...c.recent].filter(Boolean).join('\n');
+}
+
+function round(x: number): number {
+  return Math.round(x * 1000) / 1000;
+}

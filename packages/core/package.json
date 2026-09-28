@@ -1,0 +1,10 @@
+{
+  "name": "@context-tree/core",
+  "version": "0.1.0",
+  "description": "Model-agnostic Context Tree: nodes, active pointer, routing interfaces, working-context construction.",
+  "license": "MIT",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "types": "./src/index.ts",
+  "sideEffects": false
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@context-tree/jev",
+  "version": "0.1.0",
+  "description": "Jev router adapter for Context Tree (STAY / SWITCH / FORK).",
+  "license": "MIT",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "dependencies": { "@context-tree/core": "workspace:*" }
+}
