@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generatedAt": "2026-09-28T05:59:20.615Z",
-    "commit": "5603868",
+    "generatedAt": "2026-09-28T06:02:52.512Z",
+    "commit": "f6a9b91",
     "node": "v22.22.2"
   },
   "A": [
@@ -36,7 +36,7 @@
       "pollution": 0,
       "clean": 1,
       "meanTokens": 781.75,
-      "routingPurity": 0.9017857142857143,
+      "routingPurity": 0.9330357142857143,
       "finalRouted": 1
     },
     {
@@ -124,7 +124,7 @@
           "recall": true,
           "pollution": false,
           "tokens": 516,
-          "routingPurity": 0.8133333333333334,
+          "routingPurity": 1,
           "finalRoutedCorrectly": true
         },
         {
@@ -164,7 +164,7 @@
           "recall": true,
           "pollution": false,
           "tokens": 516,
-          "routingPurity": 0.8444444444444444,
+          "routingPurity": 1,
           "finalRoutedCorrectly": true
         },
         {
@@ -204,7 +204,7 @@
           "recall": true,
           "pollution": false,
           "tokens": 516,
-          "routingPurity": 0.8619718309859155,
+          "routingPurity": 0.9943661971830986,
           "finalRoutedCorrectly": true
         },
         {
@@ -244,7 +244,7 @@
           "recall": true,
           "pollution": false,
           "tokens": 516,
-          "routingPurity": 0.8609929078014185,
+          "routingPurity": 0.9957446808510638,
           "finalRoutedCorrectly": true
         },
         {
@@ -284,7 +284,7 @@
           "recall": true,
           "pollution": false,
           "tokens": 516,
-          "routingPurity": 0.8555160142348754,
+          "routingPurity": 0.997864768683274,
           "finalRoutedCorrectly": true
         },
         {
@@ -360,7 +360,7 @@
           "recall": true,
           "pollution": false,
           "tokens": 788,
-          "routingPurity": 0.75,
+          "routingPurity": 1,
           "finalRoutedCorrectly": true
         },
         {
