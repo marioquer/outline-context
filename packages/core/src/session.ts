@@ -164,6 +164,18 @@ export class ContextTreeSession {
     return getNode(this.tree, node.id);
   }
 
+  /** Append a message to a node without routing, e.g. when importing history. */
+  record(nodeId: NodeId, input: AddInput): ContextMessage {
+    getNode(this.tree, nodeId);
+    const message = this.makeMessage(input);
+    this.commit(nodeId, message);
+    if (message.role === 'user') {
+      const node = getNode(this.tree, nodeId);
+      this.tree = { ...this.tree, nodes: { ...this.tree.nodes, [nodeId]: { ...node, lastActiveAt: message.createdAt } } };
+    }
+    return { ...message, nodeId };
+  }
+
   /** Make a node active without routing (e.g. the user clicked it). */
   activate(id: NodeId): void {
     this.tree = setActive(this.tree, id);
