@@ -27,9 +27,9 @@
   --assistant-bg: var(--paper-2);
   --shadow-soft: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 1px 2px oklch(0.18 0.015 60 / 0.04);
   --shadow-lift: 0 8px 24px oklch(0.18 0.015 60 / 0.08), 0 2px 6px oklch(0.18 0.015 60 / 0.05);
-  --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --serif: 'Newsreader', ui-serif, Georgia, serif;
-  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --serif: 'Newsreader Variable', 'Newsreader', ui-serif, Georgia, serif;
+  --mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: light;

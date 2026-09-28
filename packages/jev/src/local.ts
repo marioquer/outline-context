@@ -105,8 +105,15 @@ export class LocalJevBackend implements JevBackend {
     });
 
     const someoneElseNamed = feats.some((f) => f.c.relation !== 'current' && f.titleHit > 0);
-    const scores = feats.map(({ c, lex, titleHit, pathHit, sem }) => {
-      let logit = w.lexical * lex + w.title * titleHit + w.path * pathHit + w.semantic * sem;
+    // Topical evidence for each node, before any stay prior.
+    const topical = new Map(
+      feats.map(({ c, lex, titleHit, pathHit, sem }) => [
+        c.id,
+        w.lexical * lex + w.title * titleHit + w.path * pathHit + w.semantic * sem - (c.depth === 0 ? 0.6 : 0),
+      ]),
+    );
+    const scores = feats.map(({ c, titleHit }) => {
+      let logit = topical.get(c.id)!;
       if (c.relation === 'current') {
         let prior = w.stay;
         if ((returnCue || newEntity) && titleHit === 0) prior = 0;
@@ -114,8 +121,6 @@ export class LocalJevBackend implements JevBackend {
         if (continuationCue && !someoneElseNamed) prior += w.continuation;
         logit += prior;
       }
-      // The project root is a catch-all; it should only win when nothing else fits.
-      if (c.depth === 0) logit -= 0.6;
       return { id: c.id, logit: round(logit) };
     });
 
@@ -123,13 +128,6 @@ export class LocalJevBackend implements JevBackend {
     let unseen = 0;
     for (const t of q) if (!df.has(t)) unseen += idf(t);
     const novelty = unseen / qWeight;
-    let forkLogit =
-      w.forkBase +
-      (FORK_CUE.test(req.message) ? w.forkCue : 0) +
-      w.forkNovelty * novelty +
-      (newEntity ? w.newEntity : 0);
-    if (q.length < 4) forkLogit -= 2; // too short to be a durable new context
-    if (returnCue) forkLogit -= 1.5;
 
     // The new node attaches under the candidate it relates to most, if it has room.
     // A new named subject attaches under a node the message names, else the root.
@@ -142,6 +140,19 @@ export class LocalJevBackend implements JevBackend {
         s: f.lex + f.titleHit + f.sem + (f.c.relation === 'current' ? 0.25 : 0) - (f.c.depth === 0 ? 0.3 : 0),
       }))
       .sort((a, b) => b.s - a.s)[0];
+
+    // With explicit "new thread" phrasing, a node under `parent` is about the
+    // parent's topic too, so it inherits the parent's topical evidence and
+    // the cue decides between "stay in the parent" and "open a child of it".
+    // Without a cue, novelty alone must carry the fork.
+    const forkCue = FORK_CUE.test(req.message);
+    let forkLogit =
+      w.forkBase +
+      (forkCue ? w.forkCue + (parent ? Math.max(0, topical.get(parent.id) ?? 0) : 0) : 0) +
+      w.forkNovelty * novelty +
+      (newEntity ? w.newEntity : 0);
+    if (q.length < 4) forkLogit -= 2; // too short to be a durable new context
+    if (returnCue) forkLogit -= 1.5;
 
     return {
       scores,
