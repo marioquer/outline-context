@@ -6,7 +6,9 @@ import { TableTitler, createContextTree, type ContextTreeSession, type Router } 
  */
 
 export const DEMO_SYSTEM =
-  'You are the assistant inside Outline AI. Answer using only the active context you are given. Be concise and concrete.';
+  'You are the assistant inside Outline AI, helping plan the product, its open-source router and its launch. ' +
+  'The active context below is your memory of this topic: build on its decisions and do not contradict them. ' +
+  'Where it is silent, use your own judgment and give a clear recommendation. Answer in two or three sentences.';
 
 interface SeedNode {
   id: string;
