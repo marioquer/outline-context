@@ -6,9 +6,9 @@ Every message does one of three things:
 
 **STAY** · **SWITCH** · **FORK**
 
-![Context Tree demo: four messages hop Pricing → Architecture → Launch → Pricing, then a FORK creates KV Cache under Benchmark](docs/assets/demo.gif)
+![Context Tree demo: messages hop Pricing → Architecture → Launch → back to Pricing → Benchmark; real Jev routes each one before it is sent](docs/assets/demo.gif)
 
-<sub>Left: the linear chat a model normally sees. Middle: the same messages under the context Jev routed them to. Right: the tree, Jev's decision and scores, and the size of the working context. Run it yourself with `pnpm dev` and open `?demo=true`.</sub>
+<sub>Left: each message under the context Jev routed it to; returning to a topic continues its section. Right: real Jev's decision (`typesafe-ai/jev`, made while typing, before send), the estimated tokens sent against the full history, and the tree. Replies are scripted. Run it yourself with `pnpm dev` and open `?demo=true`, or add `&live=true` for live Claude replies.</sub>
 
 ## How it works
 

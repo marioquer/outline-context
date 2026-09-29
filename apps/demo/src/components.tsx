@@ -354,7 +354,8 @@ function JevPanel({ tree, committed, preview }: { tree: ContextTree; committed: 
               </div>
             );
           })}
-          {decision.latencyMs != null && (
+          {/* The headline speed is Jev's; the instant local guess does not get one. */}
+          {decision.latencyMs != null && preview?.source !== 'guess' && (
             <div className="jev-speed">
               <span className="jev-speed-v">{fmtMs(decision.latencyMs)}</span>
               <span className="jev-speed-l">{beforeSend ? 'decided before you hit send' : 'to decide'}</span>

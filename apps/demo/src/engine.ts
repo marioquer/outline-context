@@ -277,12 +277,20 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
       if (!step) return false;
       const typed = await typeOut(step.message);
       if (!typed) return false;
-      await sleep(900); // let the preview land and be seen
+      // Pause like a person before Enter: real Jev's preview of the whole message may be
+      // waiting for a rate-limit slot, so give it up to 4 s to land, then let it be seen.
+      const t0 = Date.now();
+      while (remote && Date.now() - t0 < 4000) {
+        const shown = shownRef.current;
+        if (shown?.source === 'jev' && shown.text.trim() === step.message) break;
+        await sleep(100);
+      }
+      await sleep(900);
       if (!playingRef.current) return false;
       await send(step.message);
       return true;
     },
-    [send, typeOut],
+    [send, typeOut, remote],
   );
 
   const play = useCallback(
