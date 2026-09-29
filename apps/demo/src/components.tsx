@@ -203,6 +203,7 @@ export function ContextChat({
 /* ── Panel 3 ─────────────────────────────────────────────────────── */
 
 export function Inspector(props: {
+  jevBudget: { used: number; limit: number } | null;
   tree: ContextTree;
   committed: Committed | null;
   preview: Preview | null;
@@ -315,7 +316,17 @@ function TreeView({
   );
 }
 
-function JevPanel({ tree, committed, preview }: { tree: ContextTree; committed: Committed | null; preview: Preview | null }) {
+function JevPanel({
+  tree,
+  committed,
+  preview,
+  jevBudget,
+}: {
+  tree: ContextTree;
+  committed: Committed | null;
+  preview: Preview | null;
+  jevBudget: { used: number; limit: number } | null;
+}) {
   const decision = preview?.decision ?? committed?.decision ?? null;
   const state = preview ? 'preview' : committed ? 'committed' : 'idle';
 
@@ -342,7 +353,15 @@ function JevPanel({ tree, committed, preview }: { tree: ContextTree; committed: 
         <NetworkIcon size={13} strokeWidth={2} style={{ color: 'var(--ink-4)' }} />
         <span className="eyebrow">Jev router</span>
         <span className="state-chip" data-state={state}>
-          {state === 'idle' ? 'WAITING' : state.toUpperCase()}
+          {state === 'idle'
+            ? 'WAITING'
+            : state === 'preview' && preview?.source === 'guess'
+              ? 'PREVIEW · LOCAL GUESS'
+              : state === 'preview' && preview?.source === 'jev'
+                ? preview.decision.fallbackReason
+                  ? 'PREVIEW · FALLBACK'
+                  : 'PREVIEW · JEV'
+                : state.toUpperCase()}
         </span>
       </div>
       {decision ? (
@@ -377,6 +396,11 @@ function JevPanel({ tree, committed, preview }: { tree: ContextTree; committed: 
             </span>
             <span>{decision.source ?? 'jev'}</span>
           </div>
+          {jevBudget && (
+            <div className="note">
+              Jev calls in the last minute: {jevBudget.used} / {jevBudget.limit}. Drafts are evaluated at word boundaries, at most one call in flight.
+            </div>
+          )}
           {decision.reusedPreview && state === 'committed' && (
             <div className="note">Decided while you were typing: the send reused the preview, so no second call.</div>
           )}
@@ -530,7 +554,7 @@ export function Composer({
       label = `+ new context under ${preview.predictedParentId ? tree.nodes[preview.predictedParentId]?.title : '?'}`;
     } else if (preview.predictedNodeId) {
       const p = shortPath(tree, preview.predictedNodeId) || tree.nodes[preview.predictedNodeId]?.title;
-      label = `${d.action === 'stay' ? 'stay in' : '→'} ${p}`;
+      label = `${d.action === 'stay' ? 'stay in' : '→'} ${p}${preview.source === 'guess' ? ' (guess)' : ''}`;
     }
   } else if (draft.trim()) {
     label = 'routing…';

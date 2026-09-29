@@ -11,6 +11,7 @@ import {
 import { JevRouter } from '@context-tree/jev';
 import { DEMO_STEPS, DEMO_SYSTEM, createDemoSession, createEmptySession } from './scenario.ts';
 import { SwitchableRouter, fetchStatus, remoteJevRouter, streamChat, type ApiStatus, type ApiUsage } from './live.ts';
+import { JevPacer, atWordBoundary } from './typing.ts';
 
 export interface TokenSnapshot {
   total: number;
@@ -31,6 +32,11 @@ export interface Committed {
 
 export interface Preview {
   text: string;
+  /**
+   * `jev`: real Jev answered for this text. `guess`: instant local guess
+   * while real Jev is pending. `local`: the local backend is the router.
+   */
+  source: 'jev' | 'guess' | 'local';
   decision: RouteDecision;
   predictedNodeId: NodeId | null;
   predictedParentId: NodeId | null;
@@ -43,7 +49,10 @@ export interface Streaming {
   text: string;
 }
 
-const PREVIEW_DEBOUNCE_MS = 250;
+/** Local guess: immediately at a word boundary, else after this idle time. */
+const GUESS_IDLE_MS = 150;
+/** Real Jev: at a word boundary, else after this idle time (catches the last word). */
+const JEV_IDLE_MS = 450;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
@@ -82,7 +91,6 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const playingRef = useRef(false);
-  const previewSeq = useRef(0);
 
   const sync = useCallback(() => {
     const s = sessionRef.current!;
@@ -90,42 +98,96 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
     setTranscript(s.transcript);
   }, []);
 
-  // Typing-time preview: debounce, route without committing.
-  useEffect(() => {
-    const text = draft.trim();
-    if (!text) {
-      previewSeq.current += 1;
-      setPreview(null);
-      return;
+  // ── Typing-time preview ────────────────────────────────────────────
+  // Every word boundary gets an instant local guess (<1 ms, free). With real
+  // Jev configured, the pacer also sends the latest draft to Jev, at most one
+  // call in flight and spaced to stay under the gateway rate limit; its answer
+  // replaces the guess. Nothing is committed until send, and a Jev answer for
+  // the exact sent text is reused on send.
+  const remote = live?.jev.engine === 'jev';
+  const ratePerMinute = live?.jev.engine === 'jev' ? live.jev.ratePerMinute : 0;
+  const localRouter = useMemo(() => new JevRouter(), []);
+  const draftRef = useRef('');
+  draftRef.current = draft;
+  const shownRef = useRef<Preview | null>(null);
+  const [jevCalls, setJevCalls] = useState(0);
+
+  /**
+   * Show the answer that covers the longest prefix of the current draft;
+   * on a tie, real Jev beats a local guess. A late Jev answer for an older,
+   * shorter draft never replaces a fresher guess.
+   */
+  const offerPreview = useCallback((pv: Preview) => {
+    const current = draftRef.current.trim();
+    if (!current || !current.startsWith(pv.text)) return;
+    const shown = shownRef.current;
+    if (shown && current.startsWith(shown.text)) {
+      if (shown.text.length > pv.text.length) return;
+      if (shown.text.length === pv.text.length && shown.source === 'jev' && pv.source !== 'jev') return;
     }
-    const seq = ++previewSeq.current;
-    const timer = setTimeout(async () => {
+    shownRef.current = pv;
+    setPreview(pv);
+  }, []);
+
+  const buildPreview = useCallback(
+    (text: string, p: Awaited<ReturnType<ContextTreeSession['preview']>>, source: Preview['source']): Preview => {
       const s = sessionRef.current!;
-      const p = await s.preview(text);
-      if (seq !== previewSeq.current) return; // stale
       const nodeForContext = p.predictedNodeId ?? p.predictedParentId ?? s.activeNodeId;
       const msg: ContextMessage = { id: 'draft', role: 'user', content: text, createdAt: Date.now() };
       const ctx = buildWorkingContext(s.tree, nodeForContext, { message: msg, system: DEMO_SYSTEM });
-      setPreview({
+      return {
         text,
+        source,
         decision: p.decision,
         predictedNodeId: p.predictedNodeId,
         predictedParentId: p.predictedParentId,
-        tokens: {
-          ...ctx.tokens,
-          full: fullHistoryTokens(s.transcript, { message: msg, system: DEMO_SYSTEM }),
-        },
-      });
-    }, PREVIEW_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [draft]);
+        tokens: { ...ctx.tokens, full: fullHistoryTokens(s.transcript, { message: msg, system: DEMO_SYSTEM }) },
+      };
+    },
+    [],
+  );
+
+  const pacer = useMemo(() => {
+    if (!remote) return null;
+    const p: JevPacer = new JevPacer({
+      // Spread the per-minute budget evenly, with a little headroom.
+      minIntervalMs: Math.ceil(60_000 / ratePerMinute) + 100,
+      call: async (text) => {
+        setJevCalls(p.callsInLastMinute());
+        const result = await sessionRef.current!.preview(text);
+        offerPreview(buildPreview(text, result, 'jev'));
+      },
+    });
+    return p;
+  }, [remote, ratePerMinute, buildPreview, offerPreview]);
+
+  useEffect(() => {
+    const text = draft.trim();
+    if (!text) {
+      shownRef.current = null;
+      pacer?.reset();
+      setPreview(null);
+      return;
+    }
+    const boundary = atWordBoundary(draft);
+    const guess = setTimeout(async () => {
+      const p = await sessionRef.current!.preview(text, remote ? { router: localRouter } : {});
+      offerPreview(buildPreview(text, p, remote ? 'guess' : 'local'));
+    }, boundary ? 0 : GUESS_IDLE_MS);
+    const jev = pacer ? setTimeout(() => pacer.request(text), boundary ? 0 : JEV_IDLE_MS) : undefined;
+    return () => {
+      clearTimeout(guess);
+      clearTimeout(jev);
+    };
+  }, [draft, pacer, remote, localRouter, buildPreview, offerPreview]);
 
   const send = useCallback(
     async (raw: string) => {
       const text = raw.trim();
       if (!text || busy) return;
       setBusy(true);
-      previewSeq.current += 1;
+      shownRef.current = null;
+      pacer?.reset();
       setPreview(null);
       setDraft('');
       const s = sessionRef.current!;
@@ -187,7 +249,7 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
       sync();
       setBusy(false);
     },
-    [busy, sync, liveReplies],
+    [busy, sync, liveReplies, pacer],
   );
 
   const typeOut = useCallback(async (text: string) => {
@@ -272,5 +334,6 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
     demo: { steps: DEMO_STEPS, stepIndex, playing, play, stop, reset },
     live,
     liveReplies,
+    jevBudget: remote ? { used: jevCalls, limit: ratePerMinute } : null,
   };
 }

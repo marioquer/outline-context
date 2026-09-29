@@ -104,7 +104,7 @@ export function App() {
           streaming={s.streaming}
           committedNodeId={s.tree.activeNodeId}
         />
-        <Inspector tree={s.tree} committed={s.committed} preview={s.preview} newNodeId={s.newNodeId} />
+        <Inspector tree={s.tree} committed={s.committed} preview={s.preview} newNodeId={s.newNodeId} jevBudget={s.jevBudget} />
       </main>
 
       <Composer

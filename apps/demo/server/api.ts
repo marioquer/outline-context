@@ -18,6 +18,8 @@ export interface ApiEnv {
   AI_GATEWAY_API_KEY?: string;
   JEV_MODEL?: string;
   JEV_FORCE_LOCAL?: string;
+  /** Gateway requests per minute for Jev. Default 30 (jev-mdr's measured limit). */
+  JEV_RATE_LIMIT?: string;
   ANTHROPIC_API_KEY?: string;
   DEMO_MODEL?: string;
   DEMO_EFFORT?: string;
@@ -27,7 +29,7 @@ export const DEFAULT_DEMO_MODEL = 'claude-opus-5';
 type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 
 export interface ApiStatus {
-  jev: { engine: 'jev'; model: string } | { engine: 'local'; reason: string };
+  jev: { engine: 'jev'; model: string; ratePerMinute: number } | { engine: 'local'; reason: string };
   llm: { engine: 'claude'; model: string; effort: Effort } | { engine: 'scripted'; reason: string };
 }
 
@@ -35,7 +37,7 @@ export function status(env: ApiEnv): ApiStatus {
   const jevModel = env.JEV_MODEL?.trim() || DEFAULT_JEV_MODEL;
   return {
     jev: gatewayConfigured(env)
-      ? { engine: 'jev', model: jevModel }
+      ? { engine: 'jev', model: jevModel, ratePerMinute: Math.max(1, Number(env.JEV_RATE_LIMIT) || 30) }
       : { engine: 'local', reason: env.AI_GATEWAY_API_KEY ? 'JEV_FORCE_LOCAL=true' : 'no AI_GATEWAY_API_KEY' },
     llm: env.ANTHROPIC_API_KEY?.trim()
       ? { engine: 'claude', model: env.DEMO_MODEL?.trim() || DEFAULT_DEMO_MODEL, effort: effortOf(env) }

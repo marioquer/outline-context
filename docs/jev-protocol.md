@@ -116,3 +116,13 @@ new JevRouter({ backend: new HttpJevBackend({ url: '/api/jev' }) });      // rea
 Use a longer `timeoutMs` with real Jev: jev-mdr measured roughly 400–600 ms per call, and the default 1500 ms leaves little headroom.
 
 `LocalJevBackend` is a deterministic reference scorer. It uses IDF-weighted lexical overlap that ignores terms shared by most candidates, title and ancestor-path mentions, hashed-embedding similarity, a continuation prior for the current node, and FORK signals: explicit new-thread phrasing, unseen terms, and unseen capitalized names. It exists so the demo and benchmarks run offline, and as a baseline a trained Jev should beat.
+
+## Typing-time routing ("the section moves after one or two words")
+
+Real Jev cannot run per keystroke: the gateway limits requests (30/min in jev-mdr's account) and a call takes roughly 0.4–0.6 s. The demo (`apps/demo/src/engine.ts`, `typing.ts`) combines three things:
+
+1. **Instant local guess at every word boundary.** `tree.preview(draft, { router: localRouter })` runs the in-process reference backend (<1 ms, free), so the predicted node moves as soon as a word is complete. It is labelled `PREVIEW · LOCAL GUESS`.
+2. **Paced real Jev.** `JevPacer` sends the latest draft to Jev at word boundaries (or after 450 ms idle): at most one call in flight, calls spaced `60 000 / JEV_RATE_LIMIT + 100` ms apart, drafts typed in between are skipped rather than queued. Its answer replaces the guess (`PREVIEW · JEV`); a failed call shows `PREVIEW · FALLBACK` with the reason.
+3. **Freshest prefix wins, and send reuses Jev.** The inspector shows whichever answer covers the longest prefix of the current draft (ties go to Jev), so a late answer for an older draft never overwrites a fresher guess. If Jev already answered for the exact text being sent, `tree.add()` reuses it: no extra call.
+
+Typing a 45-character message at a normal pace costs about three Jev calls; the inspector shows the calls used in the last minute against the limit.

@@ -16,6 +16,7 @@ function demoApi(mode: string): Plugin {
     AI_GATEWAY_API_KEY: pick('AI_GATEWAY_API_KEY'),
     JEV_MODEL: pick('JEV_MODEL'),
     JEV_FORCE_LOCAL: pick('JEV_FORCE_LOCAL'),
+    JEV_RATE_LIMIT: pick('JEV_RATE_LIMIT'),
     ANTHROPIC_API_KEY: pick('ANTHROPIC_API_KEY'),
     DEMO_MODEL: pick('DEMO_MODEL'),
     DEMO_EFFORT: pick('DEMO_EFFORT'),
