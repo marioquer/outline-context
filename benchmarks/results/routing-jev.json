@@ -1,0 +1,160 @@
+{
+  "meta": {
+    "generatedAt": "2026-09-29T05:07:36.857Z",
+    "commit": "9a48de9",
+    "node": "v22.22.3"
+  },
+  "run": {
+    "router": "JevRouter (typesafe-ai/jev)",
+    "cases": 57,
+    "metrics": {
+      "stayAccuracy": 1,
+      "switchAccuracy": 0.92,
+      "forkPrecision": 1,
+      "forkRecall": 0.6,
+      "forkParentAccuracy": 1,
+      "actionAccuracy": 0.8947368421052632,
+      "targetAccuracyStrict": 0.8947368421052632,
+      "targetAccuracyLenient": 0.9298245614035088,
+      "latencyP50Ms": 324,
+      "latencyP95Ms": 586,
+      "meanRequestTokens": 605.8421052631579,
+      "fallbacks": 0
+    },
+    "byCategory": {
+      "continuation": {
+        "n": 14,
+        "strict": 1
+      },
+      "switch": {
+        "n": 10,
+        "strict": 1
+      },
+      "return": {
+        "n": 8,
+        "strict": 1
+      },
+      "new-topic": {
+        "n": 10,
+        "strict": 0.6
+      },
+      "similar-siblings": {
+        "n": 9,
+        "strict": 0.8888888888888888
+      },
+      "ambiguous": {
+        "n": 6,
+        "strict": 0.8333333333333334
+      }
+    },
+    "failures": [
+      {
+        "id": "f03",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "mkt",
+            "blog"
+          ]
+        },
+        "action": "stay",
+        "active": "blog",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 2037.984375,
+        "requestTokens": 693,
+        "fallback": null
+      },
+      {
+        "id": "f05",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "novel",
+            "chars"
+          ]
+        },
+        "action": "stay",
+        "active": "chars",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 2285.324041999993,
+        "requestTokens": 504,
+        "fallback": null
+      },
+      {
+        "id": "f06",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "kitchen",
+            "counters"
+          ]
+        },
+        "action": "switch",
+        "active": "kitchen",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 1993.9209169999958,
+        "requestTokens": 507,
+        "fallback": null
+      },
+      {
+        "id": "f07",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "fitness"
+          ]
+        },
+        "action": "stay",
+        "active": "fitness",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 2244.6202909999993,
+        "requestTokens": 493,
+        "fallback": null
+      },
+      {
+        "id": "n08",
+        "category": "similar-siblings",
+        "expected": {
+          "action": "switch",
+          "target": "chars"
+        },
+        "action": "stay",
+        "active": "plot",
+        "strict": false,
+        "lenient": true,
+        "actionCorrect": false,
+        "latencyMs": 2064.6254999999946,
+        "requestTokens": 491,
+        "fallback": null
+      },
+      {
+        "id": "a02",
+        "category": "ambiguous",
+        "expected": {
+          "action": "switch",
+          "target": "hiring"
+        },
+        "action": "stay",
+        "active": "budget",
+        "strict": false,
+        "lenient": true,
+        "actionCorrect": false,
+        "latencyMs": 2300.386916000003,
+        "requestTokens": 688,
+        "fallback": null
+      }
+    ]
+  }
+}

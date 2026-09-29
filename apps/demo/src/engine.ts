@@ -9,7 +9,7 @@ import {
   type RouteDecision,
 } from '@context-tree/core';
 import { JevRouter } from '@context-tree/jev';
-import { DEMO_STEPS, DEMO_SYSTEM, createDemoSession, createEmptySession } from './scenario.ts';
+import { DEMO_STEPS, DEMO_SYSTEM, createDemoSession, createEmptySession, stepReply } from './scenario.ts';
 import { SwitchableRouter, fetchStatus, remoteJevRouter, streamChat, type ApiStatus, type ApiUsage } from './live.ts';
 import { JevPacer, atWordBoundary } from './typing.ts';
 
@@ -41,6 +41,13 @@ export interface Preview {
   predictedNodeId: NodeId | null;
   predictedParentId: NodeId | null;
   tokens: TokenSnapshot;
+}
+
+/** Context sent to the model this session, summed over turns, against sending the full history each time. */
+export interface SessionTokens {
+  turns: number;
+  sent: number;
+  full: number;
 }
 
 export interface Streaming {
@@ -88,6 +95,7 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
   const [newNodeId, setNewNodeId] = useState<NodeId | null>(null);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
+  const [sessionTokens, setSessionTokens] = useState<SessionTokens>({ turns: 0, sent: 0, full: 0 });
   const [stepIndex, setStepIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const playingRef = useRef(false);
@@ -110,7 +118,6 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
   const draftRef = useRef('');
   draftRef.current = draft;
   const shownRef = useRef<Preview | null>(null);
-  const [jevCalls, setJevCalls] = useState(0);
 
   /**
    * Show the answer that covers the longest prefix of the current draft;
@@ -153,7 +160,6 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
       // Spread the per-minute budget evenly, with a little headroom.
       minIntervalMs: Math.ceil(60_000 / ratePerMinute) + 100,
       call: async (text) => {
-        setJevCalls(p.callsInLastMinute());
         const result = await sessionRef.current!.preview(text);
         offerPreview(buildPreview(text, result, 'jev'));
       },
@@ -201,6 +207,7 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
         ...(res.createdNode ? { createdNodeId: res.createdNode.id } : {}),
         tokens: { ...res.context!.tokens, full: res.fullHistoryTokens ?? 0 },
       });
+      setSessionTokens((t) => ({ turns: t.turns + 1, sent: t.sent + res.context!.tokens.total, full: t.full + (res.fullHistoryTokens ?? 0) }));
       if (res.createdNode) setNewNodeId(res.createdNode.id);
       sync();
 
@@ -209,7 +216,8 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
       const id = `stream-${res.message.id}`;
       setStreaming({ id, nodeId: res.activeNodeId, text: '' });
       let reply = '';
-      const scripted = DEMO_STEPS.find((st) => st.message === text)?.reply;
+      const step = DEMO_STEPS.find((st) => st.message === text);
+      const scripted = step && stepReply(step, { action: decision.action, path: res.activePath });
       if (liveReplies) {
         try {
           for await (const ev of streamChat({ system: res.context!.system, messages: res.context!.messages })) {
@@ -309,6 +317,7 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
     setEarlierCount(sessionRef.current.transcript.length);
     setDecisions({});
     setCommitted(null);
+    setSessionTokens({ turns: 0, sent: 0, full: 0 });
     setPreview(null);
     setStreaming(null);
     setNewNodeId(null);
@@ -334,6 +343,6 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
     demo: { steps: DEMO_STEPS, stepIndex, playing, play, stop, reset },
     live,
     liveReplies,
-    jevBudget: remote ? { used: jevCalls, limit: ratePerMinute } : null,
+    sessionTokens,
   };
 }
