@@ -150,7 +150,7 @@ context-tree/
 ├── packages/core     @context-tree/core   tree, active pointer, candidates, routing interfaces,
 │                                          working context, checkpoints, serialization
 ├── packages/jev      @context-tree/jev    JevRouter, Jev protocol, HTTP + local backends
-├── apps/demo         three-panel demo (React + Vite)
+├── apps/demo         interactive demo (React + Vite)
 ├── examples/basic    minimal SDK usage
 ├── benchmarks        datasets, strategies, runners, results
 └── docs              architecture, Jev protocol, benchmark methodology, Outline AI audit

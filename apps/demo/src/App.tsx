@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MoonIcon, PauseIcon, PlayIcon, RotateCcwIcon, SkipForwardIcon, SunIcon } from 'lucide-react';
 import { useContextTreeDemo } from './engine.ts';
-import { ContextChat, Composer, Inspector, LinearChat } from './components.tsx';
+import { ContextChat, Composer, Inspector } from './components.tsx';
 
 const params = new URLSearchParams(window.location.search);
 const demoMode = params.get('demo') === 'true';
@@ -65,9 +65,6 @@ export function App() {
         </span>
         {demoMode ? (
           <>
-            <span className="demo-step-label">
-              {finished ? 'demo complete' : `next ${demo.stepIndex + 1}/${demo.steps.length} · ${next?.label}`}
-            </span>
             {demo.playing ? (
               <button className="hdr-btn primary" onClick={demo.stop}>
                 <PauseIcon size={12} /> Pause
@@ -77,7 +74,12 @@ export function App() {
                 <PlayIcon size={12} /> Play demo
               </button>
             )}
-            <button className="hdr-btn" onClick={() => demo.play(1)} disabled={finished || demo.playing || s.busy} title="Next step (→)">
+            <button
+              className="hdr-btn"
+              onClick={() => demo.play(1)}
+              disabled={finished || demo.playing || s.busy}
+              title={finished ? 'Demo complete' : `Next: ${next?.label} (→)`}
+            >
               <SkipForwardIcon size={12} /> Step
             </button>
             <button className="hdr-btn icon" onClick={demo.reset} title="Reset" aria-label="Reset demo">
@@ -95,7 +97,6 @@ export function App() {
       </header>
 
       <main className="panels">
-        <LinearChat transcript={s.transcript} earlierCount={s.earlierCount} streaming={s.streaming} />
         <ContextChat
           tree={s.tree}
           transcript={s.transcript}
@@ -104,7 +105,7 @@ export function App() {
           streaming={s.streaming}
           committedNodeId={s.tree.activeNodeId}
         />
-        <Inspector tree={s.tree} committed={s.committed} preview={s.preview} newNodeId={s.newNodeId} jevBudget={s.jevBudget} />
+        <Inspector tree={s.tree} committed={s.committed} preview={s.preview} newNodeId={s.newNodeId} sessionTokens={s.sessionTokens} />
       </main>
 
       <Composer

@@ -10,24 +10,15 @@ import {
   type NodeId,
   type RouteDecision,
 } from '@context-tree/core';
-import type { Committed, Preview, Streaming, TokenSnapshot } from './engine.ts';
+import type { Committed, Preview, SessionTokens, Streaming } from './engine.ts';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 const pct = (p: number) => `${Math.round(p * 100)}%`;
+const fmtMs = (ms: number) => (ms < 1 ? '<1 ms' : `${Math.round(ms)} ms`);
 
 function shortPath(tree: ContextTree, id: NodeId): string {
   const titles = pathTitles(tree, id, { includeRoot: false });
   return titles.join(' / ');
-}
-
-function useStickToBottom(dep: unknown) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  }, [dep]);
-  return ref;
 }
 
 function Bubble({ m, streaming }: { m: { role: string; content: string }; streaming?: boolean }) {
@@ -37,45 +28,6 @@ function Bubble({ m, streaming }: { m: { role: string; content: string }; stream
         {streaming && !m.content ? <span className="thinking-dot" aria-label="Assistant is thinking" /> : m.content}
       </div>
     </div>
-  );
-}
-
-/* ── Panel 1 ─────────────────────────────────────────────────────── */
-
-export function LinearChat({
-  transcript,
-  earlierCount,
-  streaming,
-}: {
-  transcript: ContextMessage[];
-  earlierCount: number;
-  streaming: Streaming | null;
-}) {
-  const ref = useStickToBottom(`${transcript.length}:${streaming?.text.length ?? 0}`);
-  const earlier = transcript.slice(0, earlierCount);
-  const recent = transcript.slice(earlierCount);
-  return (
-    <section className="panel linear" aria-label="Linear chat">
-      <div className="panel-hd">
-        <span className="eyebrow">Linear chat</span>
-        <span className="count-chip">{transcript.length}</span>
-        <span className="panel-sub">what a model normally sees</span>
-      </div>
-      <div className="panel-body scroll" ref={ref}>
-        <div className="linear-col msgs">
-          {earlier.length > 0 && <div className="earlier">earlier · {earlier.length} messages</div>}
-          {earlier.map((m) => (
-            <Bubble key={m.id} m={m} />
-          ))}
-          {earlier.length > 0 && recent.length > 0 && <div className="earlier">this session</div>}
-          {recent.map((m) => (
-            <Bubble key={m.id} m={m} />
-          ))}
-          {streaming && <Bubble m={{ role: 'assistant', content: streaming.text }} streaming />}
-          {transcript.length === 0 && !streaming && <div className="empty">One long scroll. No structure.</div>}
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -161,22 +113,15 @@ export function ContextChat({
     const top = body.scrollTop + end.getBoundingClientRect().bottom - body.getBoundingClientRect().bottom + 24;
     if (Math.abs(body.scrollTop - top) > 1) body.scrollTo({ top: Math.max(0, top), behavior: streaming ? 'auto' : 'smooth' });
   }, [committedNodeId, activeCount, streaming?.text.length]);
-  const contexts = new Set(transcript.slice(0, earlierCount).map((m) => m.nodeId)).size;
 
   return (
     <section className="panel" aria-label="Context chat">
       <div className="panel-hd">
         <span className="eyebrow">Context chat</span>
         <span className="count-chip">{groups.length}</span>
-        <span className="panel-sub">messages under their routed context</span>
       </div>
       <div className="panel-body scroll" ref={ref}>
         <div className="doc-col">
-          {earlierCount > 0 && (
-            <div className="earlier">
-              {earlierCount} earlier messages · {contexts} contexts
-            </div>
-          )}
           {groups.length === 0 && (
             <div className="empty">
               One input. No section picking.
@@ -215,6 +160,7 @@ export function ContextChat({
                     <span className="route-chip" data-action={g.decision.action}>
                       {g.decision.action === 'fork' && <GitForkIcon size={10} />}
                       {g.decision.action}
+                      {g.decision.latencyMs != null && <span className="route-ms">{fmtMs(g.decision.latencyMs)}</span>}
                     </span>
                   )}
                 </header>
@@ -238,7 +184,7 @@ export function ContextChat({
 /* ── Panel 3 ─────────────────────────────────────────────────────── */
 
 export function Inspector(props: {
-  jevBudget: { used: number; limit: number } | null;
+  sessionTokens: SessionTokens;
   tree: ContextTree;
   committed: Committed | null;
   preview: Preview | null;
@@ -247,9 +193,9 @@ export function Inspector(props: {
   return (
     <section className="panel" aria-label="Context inspector">
       <div className="panel-body scroll insp">
-        <TreeView {...props} />
         <JevPanel {...props} />
-        <Metrics {...props} />
+        <Savings {...props} />
+        <TreeView {...props} />
       </div>
     </section>
   );
@@ -351,19 +297,13 @@ function TreeView({
   );
 }
 
-function JevPanel({
-  tree,
-  committed,
-  preview,
-  jevBudget,
-}: {
-  tree: ContextTree;
-  committed: Committed | null;
-  preview: Preview | null;
-  jevBudget: { used: number; limit: number } | null;
-}) {
+function JevPanel({ tree, committed, preview }: { tree: ContextTree; committed: Committed | null; preview: Preview | null }) {
   const decision = preview?.decision ?? committed?.decision ?? null;
-  const state = preview ? 'preview' : committed ? 'committed' : 'idle';
+
+  // Only real Jev is labelled Jev; the instant local guess says so.
+  let chip = 'WAITING';
+  if (preview) chip = preview.source === 'guess' ? 'GUESS' : preview.decision.fallbackReason ? 'FALLBACK' : 'PREVIEW';
+  else if (committed) chip = 'SENT';
 
   let target = '';
   if (decision) {
@@ -379,24 +319,17 @@ function JevPanel({
   const scores = decision?.candidateScores ?? [];
   const nodeScores = scores.filter((s) => s.nodeId !== FORK_CANDIDATE_ID).slice(0, 3);
   const fork = scores.find((s) => s.nodeId === FORK_CANDIDATE_ID);
-  const rows = [...nodeScores, ...(fork ? [fork] : [])].sort((a, b) => b.score - a.score);
+  const rows = [...nodeScores, ...(fork ? [fork] : [])].sort((a, b) => b.score - a.score).slice(0, 3);
   const topId = rows[0]?.nodeId;
+  const beforeSend = Boolean(preview) || Boolean(decision?.reusedPreview);
 
   return (
     <div className="insp-sec">
       <div className="insp-hd">
         <NetworkIcon size={13} strokeWidth={2} style={{ color: 'var(--ink-4)' }} />
         <span className="eyebrow">Jev router</span>
-        <span className="state-chip" data-state={state}>
-          {state === 'idle'
-            ? 'WAITING'
-            : state === 'preview' && preview?.source === 'guess'
-              ? 'PREVIEW · LOCAL GUESS'
-              : state === 'preview' && preview?.source === 'jev'
-                ? preview.decision.fallbackReason
-                  ? 'PREVIEW · FALLBACK'
-                  : 'PREVIEW · JEV'
-                : state.toUpperCase()}
+        <span className="state-chip" data-state={preview ? 'preview' : committed ? 'committed' : 'idle'}>
+          {chip}
         </span>
       </div>
       {decision ? (
@@ -408,7 +341,6 @@ function JevPanel({
             <span className="jev-target">{target}</span>
             <span className="jev-conf">{pct(decision.confidence)}</span>
           </div>
-          <div className="cand-label">Candidates</div>
           {rows.map((s) => {
             const isFork = s.nodeId === FORK_CANDIDATE_ID;
             const name = isFork ? 'NEW / FORK' : shortPath(tree, s.nodeId) || tree.nodes[s.nodeId]?.title || s.nodeId;
@@ -422,125 +354,73 @@ function JevPanel({
               </div>
             );
           })}
-          <div className="jev-foot">
-            <span>
-              <b>{decision.latencyMs != null ? decision.latencyMs.toFixed(1) : '–'}</b> ms
-            </span>
-            <span>
-              <b>{scores.length - 1}</b> candidates
-            </span>
-            <span>{decision.source ?? 'jev'}</span>
-          </div>
-          {jevBudget && (
-            <div className="note">
-              Jev calls in the last minute: {jevBudget.used} / {jevBudget.limit}. Drafts are evaluated at word boundaries, at most one call in flight.
+          {decision.latencyMs != null && (
+            <div className="jev-speed">
+              <span className="jev-speed-v">{fmtMs(decision.latencyMs)}</span>
+              <span className="jev-speed-l">{beforeSend ? 'decided before you hit send' : 'to decide'}</span>
             </div>
-          )}
-          {decision.reusedPreview && state === 'committed' && (
-            <div className="note">Decided while you were typing: the send reused the preview, so no second call.</div>
           )}
           {decision.fallbackReason && <div className="note warn">Fallback used: {decision.fallbackReason}</div>}
         </>
       ) : (
-        <div className="jev-empty">Start typing. Jev predicts the context before you send.</div>
+        <div className="jev-empty">Start typing. Jev picks the context before you send.</div>
       )}
     </div>
   );
 }
 
-function Metrics({ committed, preview }: { committed: Committed | null; preview: Preview | null }) {
-  const t: TokenSnapshot | null = preview?.tokens ?? committed?.tokens ?? null;
-  const reduction = t && t.full > 0 ? 1 - t.total / t.full : 0;
-  const w = (n: number) => (t && t.total ? `${(n / t.total) * 100}%` : '0%');
+/** Context tokens sent to the model: this turn and this session, against resending the full history. */
+function Savings({ committed, preview, sessionTokens }: { committed: Committed | null; preview: Preview | null; sessionTokens: SessionTokens }) {
+  const t = preview?.tokens ?? committed?.tokens ?? null;
+  const api = !preview ? committed?.api : undefined;
+  const cut = (sent: number, full: number) => (full > 0 ? `−${Math.round((1 - sent / full) * 100)}%` : '');
   return (
     <div className="insp-sec">
       <div className="insp-hd">
         <GaugeIcon size={13} strokeWidth={2} style={{ color: 'var(--ink-4)' }} />
-        <span className="eyebrow">Working context</span>
-        {t && (
-          <span className="state-chip" data-state={preview ? 'preview' : 'committed'}>
-            {preview ? 'PROJECTED' : 'LAST TURN'}
-          </span>
-        )}
+        <span className="eyebrow">Tokens sent</span>
+        <span className="state-chip" title="≈4 characters per token, computed from the messages on screen">
+          ESTIMATED
+        </span>
       </div>
       {t ? (
         <>
-          <div className="metric">
-            <span className="metric-l">Full history</span>
-            <span className="metric-v">
-              {fmt(t.full)}
-              <small>tokens</small>
-            </span>
+          <div className="save-row">
+            <span className="save-l">{preview ? 'This message' : 'Last message'}</span>
+            <span className="save-hero">{cut(t.total, t.full)}</span>
           </div>
-          <div className="metric">
-            <span className="metric-l">Context tree</span>
-            <span className="metric-v">
-              {fmt(t.total)}
-              <small>tokens</small>
-            </span>
-          </div>
-          <div className="metric hero">
-            <span className="metric-l">Reduction</span>
-            <span className="metric-v">{(reduction * 100).toFixed(1)}%</span>
-          </div>
-          <div className="ctx-bar" aria-hidden>
-            <i className="stable" style={{ width: w(t.stablePrefix) }} />
-            <i className="delta" style={{ width: w(t.delta) }} />
-            <i className="current" style={{ width: w(t.current) }} />
-          </div>
-          <div className="ctx-legend">
-            <span>
-              <i style={{ background: 'color-mix(in oklch, var(--ink-3) 55%, transparent)' }} />
-              stable prefix {fmt(t.stablePrefix)}
-            </span>
-            <span>
-              <i style={{ background: 'var(--accent)' }} />
-              delta {fmt(t.delta)}
-            </span>
-            <span>
-              <i style={{ background: 'var(--ink)' }} />
-              message {fmt(t.current)}
-            </span>
-          </div>
-          <div className="note">Token counts are estimates (≈4 characters per token), computed live from the messages on screen.</div>
-          {!preview && committed?.api && <ApiMetrics api={committed.api} />}
+          <SaveBar label="Full history" n={t.full} of={t.full} kind="full" />
+          <SaveBar label="Context Tree" n={t.total} of={t.full} kind="tree" />
+          {sessionTokens.turns > 1 && (
+            <div className="save-session">
+              <span>
+                {sessionTokens.turns} messages: <b>{fmt(sessionTokens.sent)}</b> vs {fmt(sessionTokens.full)} tokens
+              </span>
+              <b>{cut(sessionTokens.sent, sessionTokens.full)}</b>
+            </div>
+          )}
+          {api && (
+            <div className="save-api">
+              Measured · {api.model}: {fmt(api.input + api.cacheRead + api.cacheWrite)} input, {fmt(api.cacheRead)} from cache, {fmt(api.ttftMs)} ms to first token
+            </div>
+          )}
         </>
       ) : (
-        <div className="jev-empty">Send a message to measure its working context.</div>
+        <div className="jev-empty">Send a message to see what it costs.</div>
       )}
     </div>
   );
 }
 
-function ApiMetrics({ api }: { api: NonNullable<Committed['api']> }) {
-  const total = api.input + api.cacheRead + api.cacheWrite;
+function SaveBar({ label, n, of, kind }: { label: string; n: number; of: number; kind: 'full' | 'tree' }) {
   return (
-    <>
-      <div className="cand-label" style={{ marginTop: 12 }}>
-        Measured by the API · {api.model}
-      </div>
-      <div className="metric">
-        <span className="metric-l">Input</span>
-        <span className="metric-v">
-          {fmt(total)}
-          <small>tokens</small>
-        </span>
-      </div>
-      <div className="metric">
-        <span className="metric-l">Cached / written / uncached</span>
-        <span className="metric-v">
-          {fmt(api.cacheRead)} / {fmt(api.cacheWrite)} / {fmt(api.input)}
-        </span>
-      </div>
-      <div className="metric">
-        <span className="metric-l">TTFT · total</span>
-        <span className="metric-v">
-          {fmt(api.ttftMs)}
-          <small>ms</small> · {fmt(api.totalMs)}
-          <small>ms</small>
-        </span>
-      </div>
-    </>
+    <div className="save-bar" data-kind={kind}>
+      <span className="save-bar-l">{label}</span>
+      <span className="save-bar-track">
+        <i style={{ width: `${of > 0 ? Math.max(2, (n / of) * 100) : 0}%` }} />
+      </span>
+      <span className="save-bar-v">{fmt(n)}</span>
+    </div>
   );
 }
 
@@ -615,15 +495,6 @@ export function Composer({
         <button className="send" aria-label="Send" disabled={!draft.trim() || busy || readOnly} onClick={() => onSend(draft)}>
           <ArrowUpIcon size={16} strokeWidth={2.2} />
         </button>
-      </div>
-      <div className="composer-hint">
-        <span>
-          <kbd>Enter</kbd> send
-        </span>
-        <span>
-          <kbd>Shift</kbd>+<kbd>Enter</kbd> newline
-        </span>
-        <span>preview is never committed until you send</span>
       </div>
     </div>
   );
