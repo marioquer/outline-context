@@ -96,24 +96,42 @@ See [`examples/basic`](examples/basic/index.ts) for a complete runnable script.
 
 ## Benchmarks
 
-Everything below is measured by `pnpm bench` on seeded, reproducible datasets. Full tables, per-case JSON and methodology are in [`benchmarks/results/RESULTS.md`](benchmarks/results/RESULTS.md) and [`docs/benchmarks.md`](docs/benchmarks.md).
+Measured on seeded, reproducible datasets. Full tables, per-case JSON and methodology: [`benchmarks/results/RESULTS.md`](benchmarks/results/RESULTS.md) and [`docs/benchmarks.md`](docs/benchmarks.md).
 
-| Strategy | Topic return: fact in context | Collision: right fact, no conflicting fact | Input tokens at 173K history | Input cost, `ABCDEFGABCDEFG` switching (simulated cache) |
-| --- | --- | --- | --- | --- |
-| Recent window (12 msgs) | 0% | 0% | 853 (fact missing) | $0.0436 |
-| Full history | 100% | 0% | 173,034 | $0.0568 |
-| Vector retrieval (top-8 + last 4) | 100% | 0% | 414 | $0.0382 |
-| **Context Tree + Jev** | **100%** | **75%** | **516** | **$0.0350** |
-| Context Tree, oracle routing | 100% | 100% | 512 | $0.0355 |
+### Real answers (Claude Opus 5, `pnpm bench:llm`)
 
-Routing (57 hand-labelled cases): the local Jev reference backend reaches **89%** target accuracy (STAY 100%, SWITCH 88%, FORK precision 100% / recall 80%). A lexical baseline reaches 70%. Median routing latency is 0.45 ms in-process.
+Same model, same prompt template, same questions; only the context strategy differs. Accuracy is over answered requests (refusals are listed separately below).
 
-How to read this honestly:
+| Strategy | Topic return: correct | Collision: correct | Mean input tokens (A / B) |
+| --- | --- | --- | --- |
+| Recent window (12 msgs) | 0% (0/8) | 0% (0/8) | 1,093 / 903 |
+| Full history | 100% (5/5) | 100% (8/8) | 4,290 / 2,598 |
+| Vector retrieval (top-8 + last 4) | 100% (5/5) | 100% (8/8) | 787 / 894 |
+| **Context Tree + Jev** | **100% (7/7)** | **75% (6/8)** | **1,025 / 727** |
+| Context Tree, oracle routing | 100% (8/8) | 100% (8/8) | 1,030 / 705 |
 
-- These are **context-level** measurements. They check whether the right fact (and no conflicting fact) is in what the model would see, not what the model answers. `pnpm bench:llm` grades real answers with an API key; it has **not been run yet**, so there are no answer-accuracy, TTFT or measured-cache numbers here.
-- Token counts are estimates (≈4 characters per token). Cache costs are **simulated** from Anthropic's documented caching rules (Claude Opus 5 prices).
-- The conversations are synthetic. Vector retrieval does well on topic return because the question names the topic; it fails on collision because it pulls every "we decided the database is…" line.
-- The gap between "Context Tree + Jev" and "oracle routing" is routing error. All routing numbers above are from Jev's **local reference backend**, which was iterated on while these fixtures were visible, so treat them as a development score. `pnpm bench:jev` scores real `typesafe-ai/jev` on the same fixtures as a held-out result; it has **not been run yet**.
+Input tokens are as reported by the API.
+
+### Context size, scaling and cache cost (`pnpm bench`)
+
+| Strategy | Input tokens at 173K history | Input cost, `ABCDEFGABCDEFG` switching (simulated cache) |
+| --- | --- | --- |
+| Recent window (12 msgs) | 853 (fact missing) | $0.0436 |
+| Full history | 173,034 | $0.0568 |
+| Vector retrieval (top-8 + last 4) | 414 | $0.0382 |
+| **Context Tree + Jev** | **516** | **$0.0350** |
+| Context Tree, oracle routing | 512 | $0.0355 |
+
+Routing (57 hand-labelled cases): Jev's local reference backend reaches **89%** target accuracy (STAY 100%, SWITCH 88%, FORK precision 100% / recall 80%). A lexical baseline reaches 70%.
+
+### What this shows, and what it does not
+
+- **Same answers, much less context.** Wherever the right context was selected, Opus 5 answered correctly. Context Tree reaches that with about a quarter of full history's input on topic return, and its working context stays flat as history grows (~500 estimated tokens at 173K).
+- **Collisions did not fool Opus 5 at this scale.** Full history and vector retrieval put every conflicting "we decided the database is…" line into context (the context-level check in `RESULTS.md` flags 100% of them), yet the model still picked the right one. The benefit of a clean context here is size, not accuracy. Harder collisions or weaker models may differ; that is untested.
+- **Routing is the bottleneck.** Both Context Tree + Jev misses on collision are routing errors by the local reference backend; with correct routing the tree scores 100% with the fewest tokens. `pnpm bench:jev` scores real `typesafe-ai/jev` on the routing fixtures; it has **not been run yet** (no gateway key). The local backend's 89% is a development score: it was iterated on while those fixtures were visible.
+- **Refusals.** 7 of 80 requests returned `stop_reason: "refusal"`, all in three topic-return cases (A6–A8) across three strategies, which points at the synthetic text rather than the strategy. Refusal fallbacks were off so every answer comes from the same model. They are excluded from accuracy and listed in `RESULTS.md`.
+- **Measured in the demo.** In live mode, returning to Product / Pricing after two other topics read 563 of 743 input tokens from the prompt cache (Opus 5, 2.8 s TTFT).
+- Token counts in the second table are estimates (≈4 characters per token); the real tokenizer counted about 1.3× more on demo text. Cache costs there are simulated from Anthropic's documented caching rules. The conversations are synthetic.
 
 ## Architecture
 

@@ -59,3 +59,7 @@ The routing fixtures were written before the first benchmark run and have not be
 | 4. with explicit new-thread phrasing, FORK inherits its parent's topical evidence | the SDK example could not fork a sub-thread of the current node | 89% (an intermediate variant without the cue restriction scored 86% and was discarded) |
 
 The revisions were motivated by the context benchmarks and the example rather than by individual routing fixtures, but the numbers above are not a held-out evaluation. A fresh, independently written fixture set is the right way to score a trained Jev model.
+
+## Refusals in the LLM-graded run
+
+`bench:llm` runs without refusal fallbacks so that every answer comes from the same model. A request that ends with `stop_reason: "refusal"` is excluded from accuracy and counted in its own column; `pnpm bench:llm --render` re-renders the table from the saved JSON without new API calls. In the first run (Claude Opus 5), 7 of 80 requests were refused, all in topic-return cases A6–A8 and across three strategies, which suggests the synthetic filler text (API keys, webhook signing, impersonation…) rather than the context strategy.

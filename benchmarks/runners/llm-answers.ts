@@ -19,7 +19,9 @@ import Anthropic from '@anthropic-ai/sdk';
 import { TOPICS, topic } from '../datasets/conversations.ts';
 import { collisionCases, topicReturnCases, type Case } from './context.ts';
 import { makeStrategies, type Request } from '../strategies/index.ts';
-import { fmtInt, fmtPct, mdTable, mean, percentile, writeResult } from '../lib.ts';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { RESULTS_DIR, fmtInt, fmtPct, gitCommit, mdTable, mean, percentile, writeResult } from '../lib.ts';
 
 const MODEL = process.env.BENCH_MODEL ?? 'claude-opus-5';
 const LIMIT = Number(process.env.BENCH_CASES ?? 8);
@@ -100,40 +102,63 @@ async function main() {
   }
   console.log();
 
+  writeResult('llm-answers', { model: MODEL, cases: LIMIT, run: { commit: gitCommit(), at: new Date().toISOString() }, graded }, render(graded, MODEL, LIMIT));
+  console.log(render(graded, MODEL, LIMIT));
+}
+
+/**
+ * Accuracy is computed over answered requests. Refusals (stop_reason
+ * "refusal") are reported in their own column: they say something about the
+ * safety classifier and the synthetic text, not about the context strategy.
+ */
+export function render(graded: Graded[], model: string, limit: number): string {
   const strategies = [...new Set(graded.map((g) => g.strategy))];
   const table = (bench: 'A' | 'B') =>
     mdTable(
-      ['Strategy', 'Correct', 'Answer used a colliding fact', 'Mean input tokens', 'TTFT p50', 'Total p50'],
+      ['Strategy', 'Correct (answered)', 'Refused', 'Answer used a colliding fact', 'Mean input tokens', 'TTFT p50', 'Total p50'],
       strategies.map((name) => {
         const rows = graded.filter((g) => g.benchmark === bench && g.strategy === name);
+        const answered = rows.filter((r) => r.stopReason !== 'refusal');
+        const correct = answered.filter((r) => r.correct).length;
         return [
           name,
-          fmtPct(mean(rows.map((r) => (r.correct ? 1 : 0))), 0),
-          fmtPct(mean(rows.map((r) => (r.polluted ? 1 : 0))), 0),
+          `${fmtPct(answered.length ? correct / answered.length : null, 0)} (${correct}/${answered.length})`,
+          String(rows.length - answered.length),
+          fmtPct(mean(answered.map((r) => (r.polluted ? 1 : 0))), 0),
           fmtInt(mean(rows.map((r) => r.inputTokens))),
-          `${Math.round(percentile(rows.map((r) => r.ttftMs), 50))} ms`,
-          `${Math.round(percentile(rows.map((r) => r.totalMs), 50))} ms`,
+          `${Math.round(percentile(answered.map((r) => r.ttftMs), 50))} ms`,
+          `${Math.round(percentile(answered.map((r) => r.totalMs), 50))} ms`,
         ];
       }),
     );
-
-  const md = [
-    `### LLM-graded answers (${MODEL}, default sampling, ${LIMIT} cases per benchmark)`,
+  const refusals = graded.filter((g) => g.stopReason === 'refusal');
+  return [
+    `### LLM-graded answers (${model}, default settings, ${limit} cases per benchmark)`,
     '',
     'Benchmark A — topic return:',
     '',
     table('A'),
     '',
-    'Benchmark B — context collision:',
+    'Benchmark B — context collision (question does not name the topic):',
     '',
     table('B'),
     '',
-    'Input tokens are reported by the API (uncached + cache read + cache write). TTFT and total latency include network time from the benchmark machine.',
+    'Correct = the answer contains the expected value and no colliding value. Input tokens are reported by the API (uncached + cache read + cache write). TTFT and total latency include network time from the benchmark machine.',
+    refusals.length
+      ? `Refusals: ${refusals.length} of ${graded.length} requests returned stop_reason "refusal", all in cases ${[...new Set(refusals.map((r) => r.caseId))].join(', ')}, across ${new Set(refusals.map((r) => r.strategy)).size} strategies. Refusal fallbacks were deliberately off so every answer comes from the same model.`
+      : '',
   ].join('\n');
-  writeResult('llm-answers', { model: MODEL, graded }, md);
-  console.log(md);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  await main();
+  if (process.argv.includes('--render')) {
+    // Re-render the table from the last run without calling the API again.
+    const prev = JSON.parse(readFileSync(join(RESULTS_DIR, 'llm-answers.json'), 'utf8'));
+    const run = prev.run ?? { commit: prev.meta?.commit, at: prev.meta?.generatedAt };
+    const md = render(prev.graded, prev.model, prev.cases ?? LIMIT);
+    writeResult('llm-answers', { model: prev.model, cases: prev.cases ?? LIMIT, run, graded: prev.graded }, md);
+    console.log(md);
+  } else {
+    await main();
+  }
 }

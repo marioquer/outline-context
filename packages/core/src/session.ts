@@ -183,13 +183,18 @@ export class ContextTreeSession {
   }
 
   /** Route a draft message without committing anything. For typing-time preview. */
-  async preview(content: string, signal?: AbortSignal): Promise<PreviewResult> {
+  /**
+   * Route a draft without committing. Pass `router` to preview with a
+   * different (e.g. cheaper, local) router; only previews made with the
+   * session's own router are reused on send.
+   */
+  async preview(content: string, opts: { signal?: AbortSignal; router?: Router } = {}): Promise<PreviewResult> {
     const message = this.makeMessage({ role: 'user', content });
     const revision = this.revision();
-    const { decision, candidates } = await this.routeMessage(message, signal);
+    const { decision, candidates } = await this.routeMessage(message, opts.signal, opts.router);
     // Remember it: if the user sends exactly this text before the tree changes,
     // the commit reuses the decision instead of routing again.
-    if (!decision.fallbackReason && revision === this.revision()) {
+    if (!opts.router && !decision.fallbackReason && revision === this.revision()) {
       this.lastPreview = { content, revision, decision: structuredClone(decision), candidates };
     }
     return {
@@ -304,13 +309,14 @@ export class ContextTreeSession {
   private async routeMessage(
     message: ContextMessage,
     signal?: AbortSignal,
+    router: Router = this.router,
   ): Promise<{ decision: RouteDecision; candidates: NodeId[] }> {
     const tree = this.tree.activeNodeId ? this.tree : setActive(this.tree, this.activeNodeId);
     const candidates = await this.candidateBuilder.build({ message, tree });
     const t0 = now();
     let decision: RouteDecision;
     try {
-      decision = await this.router.route({ message, tree, candidates, ...(signal ? { signal } : {}) });
+      decision = await router.route({ message, tree, candidates, ...(signal ? { signal } : {}) });
       const invalid = this.invalidReason(decision);
       if (invalid) throw new Error(invalid);
     } catch (err) {

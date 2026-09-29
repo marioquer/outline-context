@@ -256,3 +256,19 @@ describe('preview reuse', () => {
     expect(r.decision?.reusedPreview).toBeUndefined();
   });
 });
+
+describe('preview with a router override', () => {
+  it('uses the override and is not reused on send', async () => {
+    let main = 0;
+    const router: Router = { route: async ({ tree }) => ((main += 1), { action: 'stay', targetNodeId: tree.activeNodeId!, confidence: 1 }) };
+    const local: Router = { route: async () => ({ action: 'switch', targetNodeId: 'launch', confidence: 0.7 }) };
+    const ct = seeded(router);
+    ct.activate('pricing');
+    const p = await ct.preview('launch talk', { router: local });
+    expect(p.predictedNodeId).toBe('launch');
+    expect(main).toBe(0);
+    const r = await ct.add({ content: 'launch talk' });
+    expect(main).toBe(1);
+    expect(r.decision?.reusedPreview).toBeUndefined();
+  });
+});
