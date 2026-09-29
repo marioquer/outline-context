@@ -363,6 +363,19 @@ button {
   background: var(--hairline);
 }
 
+.earlier-toggle {
+  width: 100%;
+  margin: 0 0 4px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.earlier-toggle:hover {
+  color: var(--ink-2);
+}
+
 /* ── Panel 2: context chat ─────────────────────────────────────────── */
 
 .doc-col {

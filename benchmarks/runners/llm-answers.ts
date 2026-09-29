@@ -10,6 +10,12 @@
  * and none of the colliding values. This spends real money: roughly
  * (cases × 5 strategies) requests.
  *
+ * With AI_GATEWAY_API_KEY set, a sixth strategy routes with real Jev
+ * (typesafe-ai/jev) next to the local reference backend: one gateway call per
+ * user message, spaced under the rate limit (about 400 calls, ~15 min at
+ * 30/min). A failed Jev call falls back to StayRouter and is counted.
+ * BENCH_JEV=off skips it.
+ *
  * Refusal fallbacks are deliberately not enabled: a fallback would switch
  * models mid-run and break the "same model" rule. Refusals are counted as
  * wrong and reported.
@@ -18,7 +24,11 @@ import '../../scripts/load-env.ts';
 import Anthropic from '@anthropic-ai/sdk';
 import { TOPICS, topic } from '../datasets/conversations.ts';
 import { collisionCases, topicReturnCases, type Case } from './context.ts';
-import { makeStrategies, type Request } from '../strategies/index.ts';
+import { ContextTreeStrategy, FullHistory, RecentWindow, VectorRetrieval, type Request, type Strategy } from '../strategies/index.ts';
+import { StayRouter } from '@context-tree/core';
+import { JevRouter } from '@context-tree/jev';
+import { gatewayConfigured } from '@context-tree/jev/gateway';
+import { ThrottledJevBackend } from '../jev-gateway.ts';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { RESULTS_DIR, fmtInt, fmtPct, gitCommit, mdTable, mean, percentile, writeResult } from '../lib.ts';
@@ -39,6 +49,29 @@ interface Graded {
   ttftMs: number;
   totalMs: number;
   answer: string;
+  /** Context Tree strategies: user messages routed in this case, and how many fell back because the Jev call failed. */
+  routed?: number;
+  fallbacks?: number;
+}
+
+const realJev = gatewayConfigured() && process.env.BENCH_JEV !== 'off' ? new ThrottledJevBackend() : null;
+
+function strategies(): Strategy[] {
+  return [
+    new RecentWindow(12),
+    new FullHistory(),
+    new VectorRetrieval(8, 4),
+    new ContextTreeStrategy({ name: 'Context Tree + Jev (local backend)' }),
+    ...(realJev
+      ? [
+          new ContextTreeStrategy({
+            name: `Context Tree + Jev (${realJev.name})`,
+            router: new JevRouter({ backend: realJev, timeoutMs: 20_000, fallback: new StayRouter() }),
+          }),
+        ]
+      : []),
+    new ContextTreeStrategy({ oracle: true }),
+  ];
 }
 
 async function ask(client: Anthropic, req: Request) {
@@ -75,7 +108,7 @@ async function main() {
   for (const [bench, c] of cases) {
     const expected = topic(c.question.topic).facts[c.question.slot];
     const conflicts = TOPICS.filter((t) => t.key !== c.question.topic).map((t) => t.facts[c.question.slot]);
-    for (const s of makeStrategies()) {
+    for (const s of strategies()) {
       for (const t of c.turns) {
         if (t.role === 'user') await s.ask(t.content, t.topic);
         else await s.answer(t.content);
@@ -96,6 +129,9 @@ async function main() {
         ttftMs: ttft,
         totalMs: total,
         answer: text,
+        ...(s instanceof ContextTreeStrategy && !s.name.includes('oracle')
+          ? { routed: s.placements.length, fallbacks: s.placements.filter((p) => p.fallback).length }
+          : {}),
       });
       process.stdout.write('.');
     }
@@ -132,6 +168,13 @@ export function render(graded: Graded[], model: string, limit: number): string {
       }),
     );
   const refusals = graded.filter((g) => g.stopReason === 'refusal');
+  const routing = strategies
+    .map((name) => graded.filter((g) => g.strategy === name && g.routed != null))
+    .filter((rows) => rows.length)
+    .map(
+      (rows) =>
+        `${rows[0]!.strategy}: ${rows.reduce((a, r) => a + r.fallbacks!, 0)} of ${rows.reduce((a, r) => a + r.routed!, 0)} routed user messages fell back (Jev call failed, StayRouter decided).`,
+    );
   return [
     `### LLM-graded answers (${model}, default settings, ${limit} cases per benchmark)`,
     '',
@@ -144,6 +187,7 @@ export function render(graded: Graded[], model: string, limit: number): string {
     table('B'),
     '',
     'Correct = the answer contains the expected value and no colliding value. Input tokens are reported by the API (uncached + cache read + cache write). TTFT and total latency include network time from the benchmark machine.',
+    ...(routing.length ? ['', 'Routing fallbacks:', ...routing.map((l) => `- ${l}`), ''] : []),
     refusals.length
       ? `Refusals: ${refusals.length} of ${graded.length} requests returned stop_reason "refusal", all in cases ${[...new Set(refusals.map((r) => r.caseId))].join(', ')}, across ${new Set(refusals.map((r) => r.strategy)).size} strategies. Refusal fallbacks were deliberately off so every answer comes from the same model.`
       : '',

@@ -104,11 +104,11 @@ export class ContextTreeStrategy implements Strategy {
   readonly name: string;
   readonly session: ContextTreeSession;
   /** Ground-truth topic of each user message, keyed by the node it landed in. */
-  readonly placements: Array<{ topic?: string; nodeId: string; action: string }> = [];
+  readonly placements: Array<{ topic?: string; nodeId: string; action: string; fallback: boolean }> = [];
   private readonly oracleNodes = new Map<string, string>();
 
-  constructor(private readonly opts: { oracle?: boolean; router?: Router } = {}) {
-    this.name = opts.oracle ? 'Context Tree (oracle routing)' : 'Context Tree + Jev';
+  constructor(private readonly opts: { oracle?: boolean; router?: Router; name?: string } = {}) {
+    this.name = opts.name ?? (opts.oracle ? 'Context Tree (oracle routing)' : 'Context Tree + Jev');
     this.session = createContextTree({
       router: opts.oracle ? new StayRouter() : (opts.router ?? new JevRouter()),
       system: SYSTEM,
@@ -127,7 +127,7 @@ export class ContextTreeStrategy implements Strategy {
       this.session.activate(id);
     }
     const r = await this.session.add({ content });
-    this.placements.push({ ...(topic ? { topic } : {}), nodeId: r.activeNodeId, action: r.decision!.action });
+    this.placements.push({ ...(topic ? { topic } : {}), nodeId: r.activeNodeId, action: r.decision!.action, fallback: !!r.decision!.fallbackReason });
     const ctx = r.context!;
     const stable = ctx.segments.filter((s) => s.stable).map((s) => s.text);
     const rest = ctx.messages.map((m) => fmt(m));

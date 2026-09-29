@@ -13,41 +13,25 @@
  */
 import '../../scripts/load-env.ts';
 import { StayRouter } from '@context-tree/core';
-import { JevRouter, type JevBackend, type JevRequest, type JevResponse } from '@context-tree/jev';
-import { GatewayJevBackend, gatewayConfigured } from '@context-tree/jev/gateway';
+import { JevRouter } from '@context-tree/jev';
+import { gatewayConfigured } from '@context-tree/jev/gateway';
+import { ThrottledJevBackend } from '../jev-gateway.ts';
 import { CASES, TREES } from '../datasets/routing-fixtures.ts';
-import { fmtInt, mean, writeResult } from '../lib.ts';
+import { fmtInt, mean, percentile, writeResult } from '../lib.ts';
 import { printFailures, routingTable, runRouter } from './routing.ts';
-
-/** Spaces calls so the run stays under the gateway's request rate limit. */
-class Throttled implements JevBackend {
-  private next = 0;
-  readonly name: string;
-  readonly usage: Array<{ inputTokens?: number; outputTokens?: number; latencyMs: number }> = [];
-  constructor(
-    private readonly inner: GatewayJevBackend,
-    private readonly minIntervalMs: number,
-  ) {
-    this.name = inner.name;
-  }
-  async route(req: JevRequest, opts?: { signal?: AbortSignal }): Promise<JevResponse> {
-    const wait = this.next - Date.now();
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    this.next = Date.now() + this.minIntervalMs;
-    const out = await this.inner.route(req, opts);
-    if (this.inner.lastCall) this.usage.push(this.inner.lastCall);
-    return out;
-  }
-}
 
 if (!gatewayConfigured()) {
   console.error('AI_GATEWAY_API_KEY is not set (or JEV_FORCE_LOCAL=true). Nothing to run.');
   process.exit(1);
 }
 
-const backend = new Throttled(new GatewayJevBackend(), Number(process.env.JEV_MIN_INTERVAL_MS ?? 2100));
-// Throttle waits happen before the call starts, so they are not in latencyMs.
+const backend = new ThrottledJevBackend();
 const run = await runRouter(`JevRouter (${backend.name})`, () => new JevRouter({ backend, timeoutMs: 20_000, fallback: new StayRouter() }));
+// The router's latencyMs wraps ThrottledJevBackend.route(), so it includes the throttle
+// wait. Report the gateway round trip (timed inside GatewayJevBackend) instead.
+const roundTrips = backend.usage.map((u) => u.latencyMs);
+run.metrics.latencyP50Ms = percentile(roundTrips, 50);
+run.metrics.latencyP95Ms = percentile(roundTrips, 95);
 
 const tokens = backend.usage.map((u) => u.inputTokens).filter((x): x is number => x != null);
 const md = [
@@ -57,7 +41,7 @@ const md = [
   '',
   `Calls: ${backend.usage.length}. Fallbacks (call failed, StayRouter decided): ${run.metrics.fallbacks}. ` +
     (tokens.length ? `Mean input tokens per call (reported by the gateway): ${fmtInt(mean(tokens))}. ` : '') +
-    'Latency is the round trip from the benchmark machine to the gateway.',
+    'Latency is the gateway round trip from the benchmark machine, excluding the throttle wait between calls.',
 ].join('\n');
 
 writeResult('routing-jev', { run }, md);

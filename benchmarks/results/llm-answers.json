@@ -1,14 +1,14 @@
 {
   "meta": {
-    "generatedAt": "2026-09-29T04:15:25.483Z",
-    "commit": "fff6245",
-    "node": "v22.22.2"
+    "generatedAt": "2026-09-29T05:45:38.583Z",
+    "commit": "9a48de9",
+    "node": "v22.22.3"
   },
   "model": "claude-opus-5",
   "cases": 8,
   "run": {
-    "commit": "fff6245",
-    "at": "2026-09-29T04:14:35.006Z"
+    "commit": "9a48de9",
+    "at": "2026-09-29T05:45:38.541Z"
   },
   "graded": [
     {
@@ -19,11 +19,11 @@
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1072,
-      "cacheReadTokens": 0,
-      "cacheWriteTokens": 1070,
-      "ttftMs": 1505.7181009999997,
-      "totalMs": 1911.150923,
-      "answer": "I don't know — no database decision (or Project Atlas discussion) appears anywhere in this conversation."
+      "cacheReadTokens": 1070,
+      "cacheWriteTokens": 0,
+      "ttftMs": 2918.133125,
+      "totalMs": 3132.711875,
+      "answer": "I don't know — no database decision (or Project Atlas) appears anywhere in this conversation."
     },
     {
       "benchmark": "A",
@@ -33,10 +33,10 @@
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 4236,
-      "cacheReadTokens": 0,
-      "cacheWriteTokens": 4234,
-      "ttftMs": 975.4458920000002,
-      "totalMs": 1379.1519089999997,
+      "cacheReadTokens": 4234,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1042.232959,
+      "totalMs": 1976.6125839999995,
       "answer": "PostgreSQL — and Atlas deploys to eu-west-1."
     },
     {
@@ -47,25 +47,43 @@
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1039,
-      "cacheReadTokens": 0,
-      "cacheWriteTokens": 1037,
-      "ttftMs": 947.1094169999997,
-      "totalMs": 2059.1335019999997,
+      "cacheReadTokens": 1037,
+      "cacheWriteTokens": 0,
+      "ttftMs": 808.871333,
+      "totalMs": 1730.9379579999995,
       "answer": "PostgreSQL — that's the database decided for Project Atlas (deploying to eu-west-1)."
     },
     {
       "benchmark": "A",
       "caseId": "A1",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1164,
+      "cacheReadTokens": 1162,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1120.4035409999997,
+      "totalMs": 1921.6135830000003,
+      "answer": "PostgreSQL.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A1",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": false,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 119,
       "cacheReadTokens": 0,
-      "cacheWriteTokens": 1162,
-      "ttftMs": 955.4368260000001,
-      "totalMs": 1644.4324269999997,
-      "answer": "PostgreSQL."
+      "cacheWriteTokens": 0,
+      "ttftMs": 2194.944749999995,
+      "totalMs": 3119.1147079999937,
+      "answer": "I don't know — the conversation context here only shows the Project Atlas Billing → Project Atlas Database path, with no record of the actual database decision.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -75,10 +93,10 @@
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1016,
-      "cacheReadTokens": 0,
-      "cacheWriteTokens": 1014,
-      "ttftMs": 949.057522000001,
-      "totalMs": 1284.0225229999996,
+      "cacheReadTokens": 1014,
+      "cacheWriteTokens": 0,
+      "ttftMs": 3133.3897089999955,
+      "totalMs": 3520.1587089999957,
       "answer": "PostgreSQL — that's the database decided for Project Atlas (deploying to eu-west-1)."
     },
     {
@@ -91,9 +109,9 @@
       "inputTokens": 1108,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1106,
-      "ttftMs": 906.7314969999989,
-      "totalMs": 1344.0638549999985,
-      "answer": "I don't know — the conversation never mentions Project Borealis or a deployment region."
+      "ttftMs": 979.5907910000096,
+      "totalMs": 1313.0051250000106,
+      "answer": "I don't know — the conversation hasn't mentioned Project Borealis or any deployment region."
     },
     {
       "benchmark": "A",
@@ -105,9 +123,9 @@
       "inputTokens": 4256,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4254,
-      "ttftMs": 1495.0383890000012,
-      "totalMs": 2084.490186000001,
-      "answer": "Borealis deploys to us-east-2."
+      "ttftMs": 1120.2093749999913,
+      "totalMs": 1947.3892079999932,
+      "answer": "us-east-2."
     },
     {
       "benchmark": "A",
@@ -119,23 +137,41 @@
       "inputTokens": 790,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 788,
-      "ttftMs": 913.4286590000011,
-      "totalMs": 1618.2468410000001,
+      "ttftMs": 1051.9909169999883,
+      "totalMs": 1909.9600419999915,
       "answer": "Project Borealis deploys to the us-east-2 region."
     },
     {
       "benchmark": "A",
       "caseId": "A2",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1028,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1026,
-      "ttftMs": 1319.9293610000004,
-      "totalMs": 1503.1369890000005,
-      "answer": "Borealis deploys to the us-east-2 region."
+      "ttftMs": 1421.7142910000111,
+      "totalMs": 2171.0118330000114,
+      "answer": "Borealis deploys to the us-east-2 region.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A2",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1028,
+      "cacheReadTokens": 1026,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1412.1998329999915,
+      "totalMs": 2255.6208749999932,
+      "answer": "Project Borealis deploys to the us-east-2 region.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -147,9 +183,9 @@
       "inputTokens": 1021,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1019,
-      "ttftMs": 1733.2819690000015,
-      "totalMs": 1959.1736299999993,
-      "answer": "Borealis deploys to us-east-2."
+      "ttftMs": 1770.958249999996,
+      "totalMs": 1922.5445830000099,
+      "answer": "Borealis deploys to the us-east-2 region."
     },
     {
       "benchmark": "A",
@@ -161,9 +197,9 @@
       "inputTokens": 1091,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1089,
-      "ttftMs": 1900.1853429999974,
-      "totalMs": 2422.1691839999985,
-      "answer": "I don't know — Project Cedar hasn't come up in our conversation (we've only discussed Fjord), and no owner was ever named."
+      "ttftMs": 3233.6869169999845,
+      "totalMs": 3950.9423329999845,
+      "answer": "I don't know — Project Cedar hasn't come up in our conversation (only Fjord has), and no owner was ever named."
     },
     {
       "benchmark": "A",
@@ -175,8 +211,8 @@
       "inputTokens": 4263,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4261,
-      "ttftMs": 1202.4269800000002,
-      "totalMs": 1481.6843850000005,
+      "ttftMs": 1341.612832999992,
+      "totalMs": 1584.0478329999896,
       "answer": "Hana owns Project Cedar end to end."
     },
     {
@@ -189,23 +225,41 @@
       "inputTokens": 642,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 640,
-      "ttftMs": 846.4718460000004,
-      "totalMs": 983.1542960000006,
+      "ttftMs": 884.8752919999824,
+      "totalMs": 1028.8542919999745,
       "answer": "Hana owns Project Cedar end to end."
     },
     {
       "benchmark": "A",
       "caseId": "A3",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1053,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1051,
-      "ttftMs": 1250.685795999998,
-      "totalMs": 2274.107795,
-      "answer": "Hana owns Project Cedar end to end."
+      "ttftMs": 1177.0835419999785,
+      "totalMs": 4018.502749999985,
+      "answer": "Hana owns Project Cedar end to end.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A3",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1053,
+      "cacheReadTokens": 1051,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1361.9825840000121,
+      "totalMs": 2106.6143750000047,
+      "answer": "Hana owns Project Cedar end to end.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -217,8 +271,8 @@
       "inputTokens": 1046,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1044,
-      "ttftMs": 920.496196,
-      "totalMs": 1745.366751999998,
+      "ttftMs": 903.9632920000004,
+      "totalMs": 1652.440249999985,
       "answer": "Hana owns Project Cedar end to end."
     },
     {
@@ -231,8 +285,8 @@
       "inputTokens": 1098,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1096,
-      "ttftMs": 946.7024259999998,
-      "totalMs": 1508.4797749999998,
+      "ttftMs": 1013.6221669999941,
+      "totalMs": 1802.9872079999768,
       "answer": "I don't know — Project Delta and its launch deadline haven't come up in this conversation."
     },
     {
@@ -245,8 +299,8 @@
       "inputTokens": 4294,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4292,
-      "ttftMs": 1109.1783240000004,
-      "totalMs": 1382.017103000002,
+      "ttftMs": 1227.7715830000234,
+      "totalMs": 1706.769708000007,
       "answer": "The Delta launch deadline is June 9."
     },
     {
@@ -259,23 +313,41 @@
       "inputTokens": 744,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 742,
-      "ttftMs": 538.572455999998,
-      "totalMs": 955.1155279999984,
+      "ttftMs": 1023.2552079999878,
+      "totalMs": 2156.30008299998,
       "answer": "The Delta launch deadline is June 9."
     },
     {
       "benchmark": "A",
       "caseId": "A4",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1035,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1033,
-      "ttftMs": 854.128219000002,
-      "totalMs": 1607.1307220000017,
-      "answer": "The Delta launch deadline is June 9."
+      "ttftMs": 977.7860420000216,
+      "totalMs": 1749.6323750000156,
+      "answer": "The Delta launch deadline is June 9.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A4",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1035,
+      "cacheReadTokens": 1033,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1384.3538750000298,
+      "totalMs": 2100.290042000008,
+      "answer": "The Delta launch deadline is June 9.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -287,8 +359,8 @@
       "inputTokens": 1030,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1028,
-      "ttftMs": 1308.0641970000033,
-      "totalMs": 1566.762227000003,
+      "ttftMs": 1532.9342499999912,
+      "totalMs": 1660.6519170000101,
       "answer": "The Delta launch deadline is June 9."
     },
     {
@@ -301,8 +373,8 @@
       "inputTokens": 1064,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1062,
-      "ttftMs": 1459.0802169999952,
-      "totalMs": 1938.6335489999983,
+      "ttftMs": 1520.0486249999958,
+      "totalMs": 1883.6191250000265,
       "answer": "I don't know — Project Ember and its message queue choice haven't come up in this conversation."
     },
     {
@@ -315,9 +387,9 @@
       "inputTokens": 4261,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4259,
-      "ttftMs": 8691.273899,
-      "totalMs": 8876.013115000002,
-      "answer": "Redis Streams."
+      "ttftMs": 1778.8104579999927,
+      "totalMs": 2055.9070829999982,
+      "answer": "Redis Streams — that's the message queue you picked for Project Ember."
     },
     {
       "benchmark": "A",
@@ -329,23 +401,41 @@
       "inputTokens": 643,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 641,
-      "ttftMs": 830.4156789999979,
-      "totalMs": 1290.0620509999935,
-      "answer": "For Ember, you picked Redis Streams as the message queue."
+      "ttftMs": 969.5079999999725,
+      "totalMs": 1492.8742089999723,
+      "answer": "Redis Streams is the message queue for Ember."
     },
     {
       "benchmark": "A",
       "caseId": "A5",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1043,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1041,
-      "ttftMs": 1828.3922410000014,
-      "totalMs": 2439.825822999999,
-      "answer": "Redis Streams."
+      "ttftMs": 868.5082499999553,
+      "totalMs": 1796.4091250000056,
+      "answer": "You picked Redis Streams as the message queue for Project Ember.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A5",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1043,
+      "cacheReadTokens": 1041,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1290.4124590000138,
+      "totalMs": 2070.8305840000394,
+      "answer": "You picked Redis Streams as the message queue for Project Ember.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -357,8 +447,8 @@
       "inputTokens": 1037,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1035,
-      "ttftMs": 956.0639079999964,
-      "totalMs": 1793.2466619999977,
+      "ttftMs": 1010.069749999966,
+      "totalMs": 1856.328416000004,
       "answer": "You picked Redis Streams as the message queue for Ember."
     },
     {
@@ -371,8 +461,8 @@
       "inputTokens": 1092,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1090,
-      "ttftMs": 1058.3657009999952,
-      "totalMs": 1502.199431000001,
+      "ttftMs": 947.1543749999837,
+      "totalMs": 1324.4585419999785,
       "answer": "I don't know — Project Fjord and any database decision haven't come up in this conversation."
     },
     {
@@ -386,7 +476,7 @@
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4267,
       "ttftMs": 0,
-      "totalMs": 537.3642340000006,
+      "totalMs": 745.818499999994,
       "answer": ""
     },
     {
@@ -400,22 +490,40 @@
       "cacheReadTokens": 0,
       "cacheWriteTokens": 933,
       "ttftMs": 0,
-      "totalMs": 525.8064120000054,
+      "totalMs": 649.4982910000253,
       "answer": ""
     },
     {
       "benchmark": "A",
       "caseId": "A6",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1010,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1008,
-      "ttftMs": 748.1313720000035,
-      "totalMs": 1926.0226760000005,
-      "answer": "MySQL — that's the database decided for Project Fjord (deploying to ca-central-1)."
+      "ttftMs": 1131.9087910000235,
+      "totalMs": 1893.2137499999953,
+      "answer": "You decided on MySQL for Project Fjord.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A6",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1010,
+      "cacheReadTokens": 1008,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1188.6832919999724,
+      "totalMs": 2167.9124999999767,
+      "answer": "MySQL — that's the database decided for Project Fjord (deploying to ca-central-1).",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -427,8 +535,8 @@
       "inputTokens": 1004,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1002,
-      "ttftMs": 734.8499470000024,
-      "totalMs": 1668.3847280000045,
+      "ttftMs": 962.6757080000243,
+      "totalMs": 1886.9012080000248,
       "answer": "MySQL — that's the database decided for Project Fjord (deploying to ca-central-1)."
     },
     {
@@ -441,9 +549,9 @@
       "inputTokens": 1073,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1071,
-      "ttftMs": 1064.1684270000042,
-      "totalMs": 2139.700094000007,
-      "answer": "I don't know — no cloud region (or Project Glacier deployment detail) has come up in our conversation."
+      "ttftMs": 949.639749999973,
+      "totalMs": 1881.3655409999774,
+      "answer": "I don't know — Project Glacier and its deployment region haven't come up in this conversation."
     },
     {
       "benchmark": "A",
@@ -456,7 +564,7 @@
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4314,
       "ttftMs": 0,
-      "totalMs": 5111.979453,
+      "totalMs": 593.0008749999688,
       "answer": ""
     },
     {
@@ -470,22 +578,40 @@
       "cacheReadTokens": 0,
       "cacheWriteTokens": 691,
       "ttftMs": 0,
-      "totalMs": 752.0838109999968,
+      "totalMs": 739.8534579999978,
       "answer": ""
     },
     {
       "benchmark": "A",
       "caseId": "A7",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": false,
       "polluted": false,
       "stopReason": "refusal",
-      "inputTokens": 857,
+      "inputTokens": 904,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 855,
       "ttftMs": 0,
-      "totalMs": 952.6574749999927,
-      "answer": ""
+      "totalMs": 593.5100000000093,
+      "answer": "",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A7",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1081,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 1079,
+      "ttftMs": 2359.2955000000075,
+      "totalMs": 2581.788583000016,
+      "answer": "Glacier deploys to the eu-north-1 region.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -497,8 +623,8 @@
       "inputTokens": 1076,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1074,
-      "ttftMs": 1331.9644989999942,
-      "totalMs": 1984.0894259999914,
+      "ttftMs": 1099.310167000047,
+      "totalMs": 1786.7980420000385,
       "answer": "Project Glacier deploys to the eu-north-1 region."
     },
     {
@@ -511,9 +637,9 @@
       "inputTokens": 1146,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1144,
-      "ttftMs": 2131.962492000006,
-      "totalMs": 2484.9952100000082,
-      "answer": "I don't know — Project Harbor and its owner haven't been mentioned anywhere in our conversation."
+      "ttftMs": 1602.1604170000064,
+      "totalMs": 2003.2739590000128,
+      "answer": "I don't know — Project Harbor hasn't come up in our conversation, so I have no information about who owns it."
     },
     {
       "benchmark": "A",
@@ -526,7 +652,7 @@
       "cacheReadTokens": 0,
       "cacheWriteTokens": 4284,
       "ttftMs": 0,
-      "totalMs": 808.3369320000056,
+      "totalMs": 1599.1178749999963,
       "answer": ""
     },
     {
@@ -540,22 +666,40 @@
       "cacheReadTokens": 0,
       "cacheWriteTokens": 665,
       "ttftMs": 0,
-      "totalMs": 454.5376200000028,
+      "totalMs": 589.3226659999928,
       "answer": ""
     },
     {
       "benchmark": "A",
       "caseId": "A8",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 1012,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1010,
-      "ttftMs": 1004.1355780000013,
-      "totalMs": 1627.3057310000004,
-      "answer": "Kofi owns Project Harbor end to end."
+      "ttftMs": 910.9351669999887,
+      "totalMs": 1540.848042000027,
+      "answer": "Kofi owns Project Harbor end to end.",
+      "routed": 28,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "A",
+      "caseId": "A8",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 1012,
+      "cacheReadTokens": 1010,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1125.0493329999736,
+      "totalMs": 1742.1506250000093,
+      "answer": "Kofi owns Project Harbor end to end.",
+      "routed": 28,
+      "fallbacks": 0
     },
     {
       "benchmark": "A",
@@ -567,8 +711,8 @@
       "inputTokens": 1006,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1004,
-      "ttftMs": 794.9516920000024,
-      "totalMs": 1448.8879149999993,
+      "ttftMs": 1159.8564999999944,
+      "totalMs": 1953.717082999996,
       "answer": "Kofi owns Project Harbor end to end."
     },
     {
@@ -581,9 +725,9 @@
       "inputTokens": 904,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 902,
-      "ttftMs": 1672.2413950000046,
-      "totalMs": 2538.3897270000016,
-      "answer": "I don't know — no database decision appears anywhere in our conversation."
+      "ttftMs": 1829.1512920000823,
+      "totalMs": 2015.9401670000516,
+      "answer": "I don't know — no database decision appears anywhere in this conversation."
     },
     {
       "benchmark": "B",
@@ -595,9 +739,9 @@
       "inputTokens": 2589,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2587,
-      "ttftMs": 2091.02721700001,
-      "totalMs": 2660.9139859999996,
-      "answer": "PostgreSQL — that's the database decided for Atlas, the current topic."
+      "ttftMs": 2272.1380000000354,
+      "totalMs": 2864.559041999979,
+      "answer": "PostgreSQL — that's the database decided for Atlas, the project you're currently back on."
     },
     {
       "benchmark": "B",
@@ -609,23 +753,41 @@
       "inputTokens": 1013,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1011,
-      "ttftMs": 1286.797488000011,
-      "totalMs": 1985.997714000012,
-      "answer": "For Atlas, the database you decided on is PostgreSQL."
+      "ttftMs": 1577.0097499999683,
+      "totalMs": 2084.125250000041,
+      "answer": "For Atlas, you decided on PostgreSQL."
     },
     {
       "benchmark": "B",
       "caseId": "B1",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": false,
       "polluted": true,
       "stopReason": "end_turn",
       "inputTokens": 864,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 862,
-      "ttftMs": 917.7017389999965,
-      "totalMs": 2181.249511999995,
-      "answer": "DynamoDB — that's what was decided for Project Borealis."
+      "ttftMs": 982.7084579999791,
+      "totalMs": 2024.1773329999996,
+      "answer": "DynamoDB — that's what was decided for Project Borealis.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B1",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 706,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 704,
+      "ttftMs": 873.1732909999555,
+      "totalMs": 1203.2610410000198,
+      "answer": "PostgreSQL — that's the database decided on for Project Atlas.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -637,9 +799,9 @@
       "inputTokens": 700,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 698,
-      "ttftMs": 1216.8460419999901,
-      "totalMs": 1361.8842210000003,
-      "answer": "PostgreSQL is the database decided on for Project Atlas."
+      "ttftMs": 1147.3622500000056,
+      "totalMs": 1349.7617910000263,
+      "answer": "PostgreSQL — that's the database decided on for Project Atlas."
     },
     {
       "benchmark": "B",
@@ -651,8 +813,8 @@
       "inputTokens": 905,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 903,
-      "ttftMs": 1262.8457980000094,
-      "totalMs": 1791.5524830000068,
+      "ttftMs": 1744.8800840000622,
+      "totalMs": 2163.4108339999802,
       "answer": "I don't know — the deployment region hasn't been mentioned in our conversation."
     },
     {
@@ -665,8 +827,8 @@
       "inputTokens": 2580,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2578,
-      "ttftMs": 1746.5771759999916,
-      "totalMs": 1895.1946219999954,
+      "ttftMs": 1712.2229590000352,
+      "totalMs": 2643.8036250000587,
       "answer": "Delta deploys to us-west-2."
     },
     {
@@ -679,23 +841,41 @@
       "inputTokens": 573,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 571,
-      "ttftMs": 954.1316480000096,
-      "totalMs": 1772.927515000003,
-      "answer": "Project Delta deploys to us-west-2."
+      "ttftMs": 1977.8672920000972,
+      "totalMs": 1978.8895000000484,
+      "answer": "Project Delta deploys to **us-west-2**."
     },
     {
       "benchmark": "B",
       "caseId": "B2",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 698,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 696,
-      "ttftMs": 1017.1039909999963,
-      "totalMs": 1860.373166999998,
-      "answer": "You're deploying Project Delta to the us-west-2 region."
+      "ttftMs": 887.7846249999711,
+      "totalMs": 1808.2409169999883,
+      "answer": "You're deploying Project Delta to the us-west-2 region.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B2",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 698,
+      "cacheReadTokens": 696,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1220.3282090000575,
+      "totalMs": 2111.4998340000166,
+      "answer": "You're deploying Project Delta to the **us-west-2** region.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -707,9 +887,9 @@
       "inputTokens": 693,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 691,
-      "ttftMs": 886.1554959999921,
-      "totalMs": 1709.907991,
-      "answer": "You're deploying Delta to the us-west-2 region."
+      "ttftMs": 1125.8948340000352,
+      "totalMs": 1889.025208999985,
+      "answer": "You're deploying Delta to the **us-west-2** region."
     },
     {
       "benchmark": "B",
@@ -721,9 +901,9 @@
       "inputTokens": 886,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 884,
-      "ttftMs": 2806.611216999998,
-      "totalMs": 3016.6279740000027,
-      "answer": "I don't know — no owner is named anywhere in this conversation (only the general advice to assign one owner and one reviewer)."
+      "ttftMs": 2817.2594159999862,
+      "totalMs": 2819.396041000029,
+      "answer": "I don't know — no owner is named anywhere in this conversation (only a general suggestion to assign one owner and one reviewer for the migration)."
     },
     {
       "benchmark": "B",
@@ -735,8 +915,8 @@
       "inputTokens": 2558,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2556,
-      "ttftMs": 2036.7396819999994,
-      "totalMs": 2040.8916260000115,
+      "ttftMs": 2053.9154159999453,
+      "totalMs": 2054.557207999984,
       "answer": "Mei owns Project Glacier end to end."
     },
     {
@@ -749,23 +929,41 @@
       "inputTokens": 925,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 923,
-      "ttftMs": 1729.589810999998,
-      "totalMs": 1735.3236000000034,
+      "ttftMs": 1628.7162500000559,
+      "totalMs": 1629.410666000098,
       "answer": "Mei owns Project Glacier end to end."
     },
     {
       "benchmark": "B",
       "caseId": "B3",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": false,
       "polluted": true,
       "stopReason": "end_turn",
       "inputTokens": 702,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 700,
-      "ttftMs": 822.5071600000083,
-      "totalMs": 1069.5403510000033,
-      "answer": "Kofi owns Project Harbor end to end."
+      "ttftMs": 977.4336670000339,
+      "totalMs": 1738.1173330000602,
+      "answer": "Kofi owns Project Harbor end to end.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B3",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 723,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 721,
+      "ttftMs": 1507.8743339999346,
+      "totalMs": 2189.677124999929,
+      "answer": "Mei owns Project Glacier end to end.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -777,8 +975,8 @@
       "inputTokens": 718,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 716,
-      "ttftMs": 1069.6028179999994,
-      "totalMs": 1810.4800959999993,
+      "ttftMs": 954.5920000000624,
+      "totalMs": 1749.2024170000805,
       "answer": "Mei owns Project Glacier end to end."
     },
     {
@@ -791,8 +989,8 @@
       "inputTokens": 901,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 899,
-      "ttftMs": 1692.664957999994,
-      "totalMs": 2061.331309000001,
+      "ttftMs": 2060.511291999952,
+      "totalMs": 2399.0944169999566,
       "answer": "I don't know — no launch deadline has been mentioned in our conversation."
     },
     {
@@ -805,9 +1003,9 @@
       "inputTokens": 2572,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2570,
-      "ttftMs": 2027.8304780000035,
-      "totalMs": 2218.7700900000054,
-      "answer": "Project Atlas's launch deadline is March 14."
+      "ttftMs": 1797.311166999978,
+      "totalMs": 2004.0426669999724,
+      "answer": "Project Atlas launches on March 14."
     },
     {
       "benchmark": "B",
@@ -819,23 +1017,41 @@
       "inputTokens": 1073,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1071,
-      "ttftMs": 1337.124840000004,
-      "totalMs": 1592.8819610000064,
+      "ttftMs": 2452.1292919999687,
+      "totalMs": 2617.8512920000358,
       "answer": "Project Atlas launches on March 14."
     },
     {
       "benchmark": "B",
       "caseId": "B4",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 692,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 690,
-      "ttftMs": 1082.4256329999916,
-      "totalMs": 1688.772404999996,
-      "answer": "The Atlas launch deadline is March 14."
+      "ttftMs": 1047.1211250000633,
+      "totalMs": 1828.030832999968,
+      "answer": "The Atlas launch deadline is March 14.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B4",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 692,
+      "cacheReadTokens": 690,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1287.0699579999782,
+      "totalMs": 2082.459499999997,
+      "answer": "The Atlas launch deadline is March 14.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -847,8 +1063,8 @@
       "inputTokens": 686,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 684,
-      "ttftMs": 1080.8781210000016,
-      "totalMs": 1278.030860999992,
+      "ttftMs": 1021.1238329999615,
+      "totalMs": 1159.0716249999823,
       "answer": "The Atlas launch deadline is March 14."
     },
     {
@@ -861,9 +1077,9 @@
       "inputTokens": 901,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 899,
-      "ttftMs": 2037.7902630000026,
-      "totalMs": 2438.0478440000006,
-      "answer": "I don't know — no message queue choice was discussed in this conversation."
+      "ttftMs": 1891.2145419999724,
+      "totalMs": 2347.446957999957,
+      "answer": "I don't know — no message queue choice appears anywhere in our conversation."
     },
     {
       "benchmark": "B",
@@ -875,37 +1091,55 @@
       "inputTokens": 2634,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2632,
-      "ttftMs": 1221.2572749999963,
-      "totalMs": 1937.7547919999924,
-      "answer": "For Atlas, you picked SQS."
+      "ttftMs": 1609.8656669999473,
+      "totalMs": 2098.495041999966,
+      "answer": "Atlas uses SQS as its message queue."
     },
     {
       "benchmark": "B",
       "caseId": "B5",
       "strategy": "Vector retrieval (top-8 + last 4)",
-      "correct": true,
-      "polluted": false,
+      "correct": false,
+      "polluted": true,
       "stopReason": "end_turn",
       "inputTokens": 1161,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1159,
-      "ttftMs": 1049.441731999992,
-      "totalMs": 1276.0620849999978,
-      "answer": "For Atlas, you picked SQS as the message queue."
+      "ttftMs": 1657.918042000034,
+      "totalMs": 1833.9568750000326,
+      "answer": "For Atlas, you picked SQS (Borealis uses Kafka and Cedar uses NATS)."
     },
     {
       "benchmark": "B",
       "caseId": "B5",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 717,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 715,
-      "ttftMs": 1033.3947970000008,
-      "totalMs": 1761.1523219999945,
-      "answer": "You picked SQS as the message queue for Project Atlas."
+      "ttftMs": 778.4818749999395,
+      "totalMs": 1330.1025829999708,
+      "answer": "You picked SQS as the message queue for Atlas.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B5",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 717,
+      "cacheReadTokens": 715,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1230.7227079999866,
+      "totalMs": 2172.4092919999966,
+      "answer": "You picked SQS as the message queue for Atlas.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -917,8 +1151,8 @@
       "inputTokens": 711,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 709,
-      "ttftMs": 1114.6941249999945,
-      "totalMs": 1794.554106999989,
+      "ttftMs": 1046.468625000096,
+      "totalMs": 1659.4160000000848,
       "answer": "You picked SQS as the message queue for Project Atlas."
     },
     {
@@ -931,9 +1165,9 @@
       "inputTokens": 898,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 896,
-      "ttftMs": 934.0539449999924,
-      "totalMs": 1619.0807289999939,
-      "answer": "I don't know — no database decision appears anywhere in this conversation."
+      "ttftMs": 1604.3334579999791,
+      "totalMs": 2166.8862920000684,
+      "answer": "I don't know — no database choice was discussed in this conversation."
     },
     {
       "benchmark": "B",
@@ -945,9 +1179,9 @@
       "inputTokens": 2625,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2623,
-      "ttftMs": 2540.592175999991,
-      "totalMs": 2546.4538329999923,
-      "answer": "For Atlas, the database is PostgreSQL."
+      "ttftMs": 890.3898330000229,
+      "totalMs": 1600.9942080000183,
+      "answer": "PostgreSQL — that's the database decided for Atlas, which is the current thread."
     },
     {
       "benchmark": "B",
@@ -959,23 +1193,41 @@
       "inputTokens": 1018,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 1016,
-      "ttftMs": 1037.0838020000083,
-      "totalMs": 1588.1097100000043,
-      "answer": "For Atlas, the database is PostgreSQL."
+      "ttftMs": 1610.2258750000037,
+      "totalMs": 1612.360457999981,
+      "answer": "For Atlas, you decided on PostgreSQL."
     },
     {
       "benchmark": "B",
       "caseId": "B6",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 724,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 722,
-      "ttftMs": 774.9983710000088,
-      "totalMs": 1187.7002710000088,
-      "answer": "PostgreSQL — that's the database decided on for Project Atlas."
+      "ttftMs": 1117.2257090000203,
+      "totalMs": 1425.4304169999668,
+      "answer": "PostgreSQL — that was the decision recorded for Atlas.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B6",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 724,
+      "cacheReadTokens": 722,
+      "cacheWriteTokens": 0,
+      "ttftMs": 4977.935500000021,
+      "totalMs": 5340.707999999984,
+      "answer": "PostgreSQL — that was the decision recorded for Atlas.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -987,8 +1239,8 @@
       "inputTokens": 718,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 716,
-      "ttftMs": 1082.1887579999893,
-      "totalMs": 1853.8099359999906,
+      "ttftMs": 1200.1343750000233,
+      "totalMs": 2137.4277500000317,
       "answer": "PostgreSQL — that's the database decided on for Project Atlas."
     },
     {
@@ -1001,23 +1253,23 @@
       "inputTokens": 920,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 918,
-      "ttftMs": 1748.5650159999932,
-      "totalMs": 2117.4203870000056,
-      "answer": "I don't know — no cloud region has been mentioned in our conversation."
+      "ttftMs": 2057.474917000043,
+      "totalMs": 2444.2664170000935,
+      "answer": "I don't know — the deployment region hasn't been mentioned in our conversation."
     },
     {
       "benchmark": "B",
       "caseId": "B7",
       "strategy": "Full history",
-      "correct": true,
+      "correct": false,
       "polluted": false,
-      "stopReason": "end_turn",
-      "inputTokens": 2632,
+      "stopReason": "refusal",
+      "inputTokens": 2679,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2630,
-      "ttftMs": 1564.1426930000016,
-      "totalMs": 2125.9421760000114,
-      "answer": "Atlas deploys to eu-west-1."
+      "ttftMs": 0,
+      "totalMs": 1403.0963749999646,
+      "answer": ""
     },
     {
       "benchmark": "B",
@@ -1029,23 +1281,41 @@
       "inputTokens": 601,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 599,
-      "ttftMs": 2088.058059999981,
-      "totalMs": 2093.018672999984,
+      "ttftMs": 1421.641624999931,
+      "totalMs": 2252.477083000005,
       "answer": "Atlas deploys to eu-west-1."
     },
     {
       "benchmark": "B",
       "caseId": "B7",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 722,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 720,
-      "ttftMs": 1784.2463249999855,
-      "totalMs": 1786.407979999989,
-      "answer": "Project Atlas is deploying to the **eu-west-1** region."
+      "ttftMs": 1947.9469999999274,
+      "totalMs": 1948.9493329999968,
+      "answer": "Project Atlas is deploying to the **eu-west-1** region.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B7",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 722,
+      "cacheReadTokens": 720,
+      "cacheWriteTokens": 0,
+      "ttftMs": 1587.561166999978,
+      "totalMs": 2137.025874999934,
+      "answer": "Project Atlas is deploying to the **eu-west-1** region.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -1057,8 +1327,8 @@
       "inputTokens": 716,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 714,
-      "ttftMs": 874.1051529999822,
-      "totalMs": 1623.5297399999981,
+      "ttftMs": 1294.331540999934,
+      "totalMs": 1939.9286660000216,
       "answer": "Atlas is deploying to the eu-west-1 region."
     },
     {
@@ -1071,9 +1341,9 @@
       "inputTokens": 906,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 904,
-      "ttftMs": 2032.5898429999943,
-      "totalMs": 2285.321054,
-      "answer": "I don't know — no owner has been named anywhere in this conversation."
+      "ttftMs": 2377.663500000024,
+      "totalMs": 2835.563749999972,
+      "answer": "I don't know — project ownership wasn't mentioned in our conversation."
     },
     {
       "benchmark": "B",
@@ -1085,9 +1355,9 @@
       "inputTokens": 2590,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 2588,
-      "ttftMs": 14750.681790000002,
-      "totalMs": 14753.721411000006,
-      "answer": "Priya owns Project Atlas end to end."
+      "ttftMs": 1519.6741669999901,
+      "totalMs": 2482.373292000033,
+      "answer": "Priya owns Project Atlas (the billing service) end to end."
     },
     {
       "benchmark": "B",
@@ -1099,23 +1369,41 @@
       "inputTokens": 787,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 785,
-      "ttftMs": 1030.6869420000003,
-      "totalMs": 1673.7719090000028,
+      "ttftMs": 892.4392080000835,
+      "totalMs": 1413.6525000000838,
       "answer": "Priya owns Project Atlas end to end."
     },
     {
       "benchmark": "B",
       "caseId": "B8",
-      "strategy": "Context Tree + Jev",
+      "strategy": "Context Tree + Jev (local backend)",
       "correct": true,
       "polluted": false,
       "stopReason": "end_turn",
       "inputTokens": 700,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 698,
-      "ttftMs": 939.9254680000013,
-      "totalMs": 1629.5138359999983,
-      "answer": "Priya owns Project Atlas (the billing service) end to end."
+      "ttftMs": 1008.1473339999793,
+      "totalMs": 1724.2576249999693,
+      "answer": "Priya owns Project Atlas (the billing service) end to end.",
+      "routed": 20,
+      "fallbacks": 0
+    },
+    {
+      "benchmark": "B",
+      "caseId": "B8",
+      "strategy": "Context Tree + Jev (typesafe-ai/jev)",
+      "correct": true,
+      "polluted": false,
+      "stopReason": "end_turn",
+      "inputTokens": 700,
+      "cacheReadTokens": 698,
+      "cacheWriteTokens": 0,
+      "ttftMs": 897.7708330000751,
+      "totalMs": 1570.2362500000745,
+      "answer": "Priya owns Project Atlas (the billing service) end to end.",
+      "routed": 20,
+      "fallbacks": 0
     },
     {
       "benchmark": "B",
@@ -1127,8 +1415,8 @@
       "inputTokens": 694,
       "cacheReadTokens": 0,
       "cacheWriteTokens": 692,
-      "ttftMs": 902.0085820000095,
-      "totalMs": 1599.9298190000118,
+      "ttftMs": 1837.4309580000117,
+      "totalMs": 2616.7560829999857,
       "answer": "Priya owns Project Atlas (the billing service) end to end."
     }
   ]

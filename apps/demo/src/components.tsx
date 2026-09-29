@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, type KeyboardEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { ArrowUpIcon, GitForkIcon, HashIcon, NetworkIcon, GaugeIcon } from 'lucide-react';
 import {
   FORK_CANDIDATE_ID,
@@ -81,14 +81,34 @@ export function LinearChat({
 
 /* ── Panel 2 ─────────────────────────────────────────────────────── */
 
+/** A section's history from before this session, collapsed behind a toggle. */
+function EarlierInSection({ messages }: { messages: ContextMessage[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button className="earlier earlier-toggle" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        {open ? 'hide' : 'show'} {messages.length} earlier messages
+      </button>
+      {open && messages.map((m) => <Bubble key={m.id} m={m} />)}
+    </>
+  );
+}
+
 interface Group {
-  key: string;
   nodeId: NodeId;
+  earlier: ContextMessage[];
   messages: ContextMessage[];
+  /** Decision that routed the most recent run of messages into this section. */
   decision?: RouteDecision;
+  /** The most recent run came back to a section that already had messages this session. */
   returned: boolean;
 }
 
+/**
+ * One section per context node, in tree order. A message that returns to a
+ * context is appended to that context's section (which scrolls into view)
+ * instead of opening a new block at the bottom.
+ */
 export function ContextChat({
   tree,
   transcript,
@@ -105,28 +125,42 @@ export function ContextChat({
   committedNodeId: NodeId | null;
 }) {
   const groups = useMemo(() => {
-    const out: Group[] = [];
-    const seen = new Set<NodeId>();
+    const byNode = new Map<NodeId, Group>();
+    const group = (nodeId: NodeId) => {
+      let g = byNode.get(nodeId);
+      if (!g) byNode.set(nodeId, (g = { nodeId, earlier: [], messages: [], returned: false }));
+      return g;
+    };
+    transcript.slice(0, earlierCount).forEach((m) => group(m.nodeId ?? '').earlier.push(m));
+    let prev: NodeId | null = null;
     for (const m of transcript.slice(earlierCount)) {
-      const nodeId = m.nodeId ?? '';
-      const last = out[out.length - 1];
-      if (last && last.nodeId === nodeId) {
-        last.messages.push(m);
-        continue;
+      const g = group(m.nodeId ?? '');
+      if (g.nodeId !== prev) {
+        g.returned = g.messages.length > 0;
+        if (decisions[m.id]) g.decision = decisions[m.id];
+        else delete g.decision;
       }
-      out.push({
-        key: m.id,
-        nodeId,
-        messages: [m],
-        ...(decisions[m.id] ? { decision: decisions[m.id] } : {}),
-        returned: seen.has(nodeId),
-      });
-      seen.add(nodeId);
+      g.messages.push(m);
+      prev = g.nodeId;
     }
-    return out;
-  }, [transcript, earlierCount, decisions]);
+    // Sections appear once they are used this session; tree order keeps them outline-shaped.
+    return walk(tree).flatMap(({ node }) => {
+      const g = byNode.get(node.id);
+      return g && (g.messages.length > 0 || streaming?.nodeId === node.id) ? [g] : [];
+    });
+  }, [tree, transcript, earlierCount, decisions, streaming?.nodeId]);
 
-  const ref = useStickToBottom(`${transcript.length}:${streaming?.text.length ?? 0}`);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const activeEnd = useRef<HTMLDivElement | null>(null);
+  const activeCount = groups.find((g) => g.nodeId === committedNodeId)?.messages.length ?? 0;
+  useLayoutEffect(() => {
+    const end = activeEnd.current;
+    const body = ref.current;
+    if (!end || !body) return;
+    // Keep the end of the active section in view: jump there on a switch, follow it while streaming.
+    const top = body.scrollTop + end.getBoundingClientRect().bottom - body.getBoundingClientRect().bottom + 24;
+    if (Math.abs(body.scrollTop - top) > 1) body.scrollTo({ top: Math.max(0, top), behavior: streaming ? 'auto' : 'smooth' });
+  }, [committedNodeId, activeCount, streaming?.text.length]);
   const contexts = new Set(transcript.slice(0, earlierCount).map((m) => m.nodeId)).size;
 
   return (
@@ -150,14 +184,13 @@ export function ContextChat({
               <strong>Jev</strong> decides where each message belongs.
             </div>
           )}
-          {groups.map((g, i) => {
-            const isLast = i === groups.length - 1;
-            const active = isLast && g.nodeId === committedNodeId;
+          {groups.map((g) => {
+            const active = g.nodeId === committedNodeId;
             const titles = pathTitles(tree, g.nodeId, { includeRoot: false });
             const depth = depthOf(tree, g.nodeId);
-            const stream = isLast && streaming && streaming.nodeId === g.nodeId ? streaming : null;
+            const stream = streaming && streaming.nodeId === g.nodeId ? streaming : null;
             return (
-              <article key={g.key} className="section" data-active={active} data-dim={!isLast}>
+              <article key={g.nodeId} className="section" data-active={active} data-dim={!active}>
                 <header className="section-head">
                   <span className="level" data-level={depth}>
                     {depth === 0 ? '◆' : `H${depth}`}
@@ -186,11 +219,13 @@ export function ContextChat({
                   )}
                 </header>
                 <div className="msgs">
+                  {g.earlier.length > 0 && <EarlierInSection messages={g.earlier} />}
                   {g.messages.map((m) => (
                     <Bubble key={m.id} m={m} />
                   ))}
                   {stream && <Bubble m={{ role: 'assistant', content: stream.text }} streaming />}
                 </div>
+                {active && <div ref={activeEnd} />}
               </article>
             );
           })}

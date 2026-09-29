@@ -1,4 +1,4 @@
-import { TableTitler, createContextTree, type ContextTreeSession, type Router } from '@context-tree/core';
+import { TableTitler, createContextTree, type ContextTreeSession, type RouteAction, type Router } from '@context-tree/core';
 
 /**
  * The known tree and conversation used by `?demo=true`. Everything the demo
@@ -132,9 +132,16 @@ const HISTORY: Array<[nodeId: string, user: string, assistant: string]> = [
   ],
 ];
 
+/** Where the message was actually routed. */
+export interface Routed {
+  action: RouteAction;
+  path: string[];
+}
+
 export interface DemoStep {
   message: string;
-  reply: string;
+  /** Scripted reply. A function when the reply depends on the route, so it never claims a route that did not happen. */
+  reply: string | ((routed: Routed) => string);
   /** What the step is meant to show. Shown in the demo controls. */
   label: string;
 }
@@ -173,10 +180,17 @@ export const DEMO_STEPS: DemoStep[] = [
   {
     label: 'FORK · Benchmark → KV Cache',
     message: 'We should specifically test prompt cache behavior during frequent topic switching.',
-    reply:
-      'Opened a new context for this under Benchmark. Plan: replay AAAA, AAAABAAAA, ABAB and ABCDEFG switching patterns with identical questions, and record cached vs uncached input tokens and time-to-first-token per turn.',
+    reply: ({ action, path }) =>
+      (action === 'fork'
+        ? `Opened a new context for this under ${path.at(-2) ?? 'the project'}.`
+        : `Keeping this in ${path.join(' / ') || 'the project root'}.`) +
+      ' Plan: replay AAAA, AAAABAAAA, ABAB and ABCDEFG switching patterns with identical questions, and record cached vs uncached input tokens and time-to-first-token per turn.',
   },
 ];
+
+export function stepReply(step: DemoStep, routed: Routed): string {
+  return typeof step.reply === 'function' ? step.reply(routed) : step.reply;
+}
 
 export const DEMO_TITLES = new TableTitler([{ match: /prompt cache|kv cache/i, title: 'KV Cache' }]);
 

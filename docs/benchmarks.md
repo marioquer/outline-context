@@ -25,6 +25,7 @@ All strategies see the same turns and the same system prompt. Only the context s
 | Full history | every message |
 | Vector retrieval | top-8 past messages by embedding similarity (same hashing embedder as Context Tree), in chronological order, plus the last 4 messages |
 | Context Tree + Jev | Jev routes **every** user message starting from an empty tree (root only); the working context of the routed node |
+| Context Tree + real Jev (`bench:llm` only, with `AI_GATEWAY_API_KEY`) | the same, routed by `typesafe-ai/jev` on the gateway (calls spaced 2.1 s; a failed call falls back to STAY and is counted); `BENCH_JEV=off` skips it |
 | Context Tree (oracle routing) | each message is placed in its ground-truth topic node; isolates context construction from routing errors |
 
 ## Datasets
@@ -62,4 +63,4 @@ The revisions were motivated by the context benchmarks and the example rather th
 
 ## Refusals in the LLM-graded run
 
-`bench:llm` runs without refusal fallbacks so that every answer comes from the same model. A request that ends with `stop_reason: "refusal"` is excluded from accuracy and counted in its own column; `pnpm bench:llm --render` re-renders the table from the saved JSON without new API calls. In the first run (Claude Opus 5), 7 of 80 requests were refused, all in topic-return cases A6–A8 and across three strategies, which suggests the synthetic filler text (API keys, webhook signing, impersonation…) rather than the context strategy.
+`bench:llm` runs without refusal fallbacks so that every answer comes from the same model. A request that ends with `stop_reason: "refusal"` is excluded from accuracy and counted in its own column; `pnpm bench:llm --render` re-renders the table from the saved JSON without new API calls. In the first run (Claude Opus 5), 7 of 80 requests were refused, all in topic-return cases A6–A8 and across three strategies. In the second run, which added the real-Jev strategy, 8 of 96 were refused, in A6–A8 and B7, again across three strategies. This suggests the synthetic filler text (API keys, webhook signing, impersonation…) rather than the context strategy.

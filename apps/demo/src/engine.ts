@@ -9,7 +9,7 @@ import {
   type RouteDecision,
 } from '@context-tree/core';
 import { JevRouter } from '@context-tree/jev';
-import { DEMO_STEPS, DEMO_SYSTEM, createDemoSession, createEmptySession } from './scenario.ts';
+import { DEMO_STEPS, DEMO_SYSTEM, createDemoSession, createEmptySession, stepReply } from './scenario.ts';
 import { SwitchableRouter, fetchStatus, remoteJevRouter, streamChat, type ApiStatus, type ApiUsage } from './live.ts';
 import { JevPacer, atWordBoundary } from './typing.ts';
 
@@ -209,7 +209,8 @@ export function useContextTreeDemo(demoMode: boolean, liveInDemo = false) {
       const id = `stream-${res.message.id}`;
       setStreaming({ id, nodeId: res.activeNodeId, text: '' });
       let reply = '';
-      const scripted = DEMO_STEPS.find((st) => st.message === text)?.reply;
+      const step = DEMO_STEPS.find((st) => st.message === text);
+      const scripted = step && stepReply(step, { action: decision.action, path: res.activePath });
       if (liveReplies) {
         try {
           for await (const ev of streamChat({ system: res.context!.system, messages: res.context!.messages })) {

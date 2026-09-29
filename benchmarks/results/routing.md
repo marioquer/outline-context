@@ -3,8 +3,8 @@
 | Router | STAY acc | SWITCH acc | FORK prec | FORK recall | FORK parent | Target acc (strict) | Target acc (lenient) | p50 / p95 latency |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Always STAY | 100% | 0% | – | 0% | – | 39% | 42% | 0.00 / 0.00 ms |
-| MockRouter (lexical) | 64% | 92% | 45% | 50% | 60% | 70% | 70% | 0.20 / 0.87 ms |
-| JevRouter (local reference backend) | 100% | 88% | 100% | 80% | 88% | 89% | 91% | 0.53 / 1.31 ms |
+| MockRouter (lexical) | 64% | 92% | 45% | 50% | 60% | 70% | 70% | 0.08 / 0.19 ms |
+| JevRouter (local reference backend) | 100% | 88% | 100% | 80% | 88% | 89% | 91% | 0.25 / 0.75 ms |
 
 By category (strict):
 
