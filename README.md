@@ -1,0 +1,162 @@
+# Context Tree
+
+A semantic context switcher for long-running LLM conversations.
+
+Every message does one of three things:
+
+**STAY** · **SWITCH** · **FORK**
+
+![Context Tree demo: four messages hop Pricing → Architecture → Launch → Pricing, then a FORK creates KV Cache under Benchmark](docs/assets/demo.gif)
+
+<sub>Left: the linear chat a model normally sees. Middle: the same messages under the context Jev routed them to. Right: the tree, Jev's decision and scores, and the size of the working context. Run it yourself with `pnpm dev` and open `?demo=true`.</sub>
+
+## How it works
+
+```
+Message
+   ↓
+Candidate Builder      locality + recency + semantic top-k → 8–16 nodes
+   ↓
+Jev                    one bounded decision, with probabilities
+   ↓
+STAY / SWITCH / FORK
+   ↓
+Context Tree           active pointer moves; FORK adds a node
+   ↓
+Working Context        root checkpoint + active path + active checkpoint + recent turns
+   ↓
+LLM
+```
+
+Jev decides **where**. The LLM decides **what to say**.
+
+Jev can also route a draft while you type (preview) without committing anything. The active context changes only when you send.
+
+## Quick start
+
+```bash
+pnpm install
+pnpm dev            # demo at http://localhost:5173/?demo=true
+pnpm example        # minimal SDK example in the terminal
+pnpm test
+pnpm bench          # regenerates benchmarks/results/RESULTS.md
+```
+
+Requires Node 20+ and pnpm. No API keys needed: without keys, the demo, tests and benchmarks run locally and deterministically on Jev's local reference backend.
+
+### Live mode (optional)
+
+```bash
+cp .env.example .env.local   # add AI_GATEWAY_API_KEY and/or ANTHROPIC_API_KEY
+pnpm jev:check               # one live Jev call, printed verbatim
+pnpm dev                     # the header shows JEV · typesafe-ai/jev and LLM · <model>
+```
+
+| Key | Enables |
+| --- | --- |
+| `AI_GATEWAY_API_KEY` | real Jev ([`typesafe-ai/jev`](https://vercel.com/ai-gateway/models) on the Vercel AI Gateway) for routing in the demo, `pnpm jev:check`, `pnpm bench:jev` |
+| `ANTHROPIC_API_KEY` | live Claude replies in free-chat mode (`?demo=true&live=true` for the scripted demo too) with measured input, cache and TTFT in the inspector; `pnpm bench:llm` |
+
+Keys stay in the Vite dev server (`apps/demo/server/api.ts`); the browser never sees them. A typing-time preview that matches the sent text is reused on send, so each message costs one Jev call.
+
+```ts
+import { createContextTree } from '@context-tree/core';
+import { JevRouter } from '@context-tree/jev';
+import { GatewayJevBackend } from '@context-tree/jev/gateway'; // server-side
+
+const tree = createContextTree({
+  router: new JevRouter({ backend: new GatewayJevBackend() }), // omit backend for the local reference scorer
+  root: 'My project',
+});
+
+const result = await tree.add({ role: 'user', content: 'Back to pricing — should Pro be $15 or $20?' });
+
+result.decision;   // e.g. { action: 'switch', targetNodeId: '…', confidence: 0.97, candidateScores: [...], latencyMs: 1.9 }
+result.activePath; // ['Product', 'Pricing']
+result.context;    // { system, messages, checkpoint, recentMessages, tokens: { total, stablePrefix, delta, current } }
+
+// Send result.context.system + result.context.messages to your model, then:
+await tree.add({ role: 'assistant', content: reply });
+```
+
+Other entry points:
+
+- `tree.preview(draft)`: route without committing (typing-time preview)
+- `tree.toJSON()` / `createContextTree({ router, initial })`: serialize and restore
+- `tree.createNode(...)`, `tree.record(...)`, `tree.activate(...)`: seed or import a tree
+
+See [`examples/basic`](examples/basic/index.ts) for a complete runnable script.
+
+## Why it matters
+
+- **Less irrelevant history.** The model sees the active branch, not every topic you touched.
+- **Topic continuity.** Returning to an old topic restores its context, not a keyword search over it.
+- **Smaller, cache-friendly prompts.** The working context stays roughly constant as history grows, and its prefix only changes when you switch.
+- **Human-readable state.** The same tree is navigation for the user and context state for the machine.
+
+## Benchmarks
+
+Measured on seeded, reproducible datasets. Full tables, per-case JSON and methodology: [`benchmarks/results/RESULTS.md`](benchmarks/results/RESULTS.md) and [`docs/benchmarks.md`](docs/benchmarks.md).
+
+### Real answers (Claude Opus 5, `pnpm bench:llm`)
+
+Same model, same prompt template, same questions; only the context strategy differs. Accuracy is over answered requests (refusals are listed separately below).
+
+| Strategy | Topic return: correct | Collision: correct | Mean input tokens (A / B) |
+| --- | --- | --- | --- |
+| Recent window (12 msgs) | 0% (0/8) | 0% (0/8) | 1,093 / 903 |
+| Full history | 100% (5/5) | 100% (8/8) | 4,290 / 2,598 |
+| Vector retrieval (top-8 + last 4) | 100% (5/5) | 100% (8/8) | 787 / 894 |
+| **Context Tree + Jev** | **100% (7/7)** | **75% (6/8)** | **1,025 / 727** |
+| Context Tree, oracle routing | 100% (8/8) | 100% (8/8) | 1,030 / 705 |
+
+Input tokens are as reported by the API.
+
+### Context size, scaling and cache cost (`pnpm bench`)
+
+| Strategy | Input tokens at 173K history | Input cost, `ABCDEFGABCDEFG` switching (simulated cache) |
+| --- | --- | --- |
+| Recent window (12 msgs) | 853 (fact missing) | $0.0436 |
+| Full history | 173,034 | $0.0568 |
+| Vector retrieval (top-8 + last 4) | 414 | $0.0382 |
+| **Context Tree + Jev** | **516** | **$0.0350** |
+| Context Tree, oracle routing | 512 | $0.0355 |
+
+Routing (57 hand-labelled cases): Jev's local reference backend reaches **89%** target accuracy (STAY 100%, SWITCH 88%, FORK precision 100% / recall 80%). A lexical baseline reaches 70%.
+
+### What this shows, and what it does not
+
+- **Same answers, much less context.** Wherever the right context was selected, Opus 5 answered correctly. Context Tree reaches that with about a quarter of full history's input on topic return, and its working context stays flat as history grows (~500 estimated tokens at 173K).
+- **Collisions did not fool Opus 5 at this scale.** Full history and vector retrieval put every conflicting "we decided the database is…" line into context (the context-level check in `RESULTS.md` flags 100% of them), yet the model still picked the right one. The benefit of a clean context here is size, not accuracy. Harder collisions or weaker models may differ; that is untested.
+- **Routing is the bottleneck.** Both Context Tree + Jev misses on collision are routing errors by the local reference backend; with correct routing the tree scores 100% with the fewest tokens. `pnpm bench:jev` scores real `typesafe-ai/jev` on the routing fixtures; it has **not been run yet** (no gateway key). The local backend's 89% is a development score: it was iterated on while those fixtures were visible.
+- **Refusals.** 7 of 80 requests returned `stop_reason: "refusal"`, all in three topic-return cases (A6–A8) across three strategies, which points at the synthetic text rather than the strategy. Refusal fallbacks were off so every answer comes from the same model. They are excluded from accuracy and listed in `RESULTS.md`.
+- **Measured in the demo.** In live mode, returning to Product / Pricing after two other topics read 563 of 743 input tokens from the prompt cache (Opus 5, 2.8 s TTFT).
+- Token counts in the second table are estimates (≈4 characters per token); the real tokenizer counted about 1.3× more on demo text. Cache costs there are simulated from Anthropic's documented caching rules. The conversations are synthetic.
+
+## Architecture
+
+```
+context-tree/
+├── packages/core     @context-tree/core   tree, active pointer, candidates, routing interfaces,
+│                                          working context, checkpoints, serialization
+├── packages/jev      @context-tree/jev    JevRouter, Jev protocol, HTTP + local backends
+├── apps/demo         three-panel demo (React + Vite)
+├── examples/basic    minimal SDK usage
+├── benchmarks        datasets, strategies, runners, results
+└── docs              architecture, Jev protocol, benchmark methodology, Outline AI audit
+```
+
+- **`@context-tree/core` is model-agnostic.** It knows nothing about React, Jev, providers, databases or auth. Routers, candidate builders, embedders, titlers and summarizers are interfaces.
+- **`@context-tree/jev`** turns candidates into a `jev.route.v0` request and the response into a decision, with a timeout and a fallback router. `HttpJevBackend` calls a hosted Jev model. `LocalJevBackend` is a deterministic in-process reference scorer, so everything runs without a network.
+- **Working context** is built cache-first: stable global prefix → root checkpoint → active path → active checkpoint → append-only recent turns → current message. Checkpoints are versioned and only re-folded when a node's delta passes a threshold, never on every turn.
+- **Depth is capped** (`maxDepth`, default 3 below the root). A FORK that would go deeper attaches to the nearest allowed ancestor.
+
+More in [`docs/architecture.md`](docs/architecture.md) and [`docs/jev-protocol.md`](docs/jev-protocol.md). The demo's visual language comes from Outline AI; see [`docs/outline-ai-reference-audit.md`](docs/outline-ai-reference-audit.md).
+
+## Status
+
+Stage 1: an open-source primitive and demo. There is no hosted service, accounts or billing, and none are planned for this repository.
+
+## License
+
+MIT

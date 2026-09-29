@@ -1,0 +1,883 @@
+{
+  "meta": {
+    "generatedAt": "2026-09-29T04:16:46.421Z",
+    "commit": "7c10337",
+    "node": "v22.22.2"
+  },
+  "A": [
+    {
+      "strategy": "Recent window (12 msgs)",
+      "n": 8,
+      "recall": 0,
+      "pollution": 0,
+      "clean": 0,
+      "meanTokens": 860.375
+    },
+    {
+      "strategy": "Full history",
+      "n": 8,
+      "recall": 1,
+      "pollution": 0,
+      "clean": 1,
+      "meanTokens": 3383
+    },
+    {
+      "strategy": "Vector retrieval (top-8 + last 4)",
+      "n": 8,
+      "recall": 1,
+      "pollution": 0,
+      "clean": 1,
+      "meanTokens": 576
+    },
+    {
+      "strategy": "Context Tree + Jev",
+      "n": 8,
+      "recall": 1,
+      "pollution": 0,
+      "clean": 1,
+      "meanTokens": 781.75,
+      "routingPurity": 0.9330357142857143,
+      "finalRouted": 1
+    },
+    {
+      "strategy": "Context Tree (oracle routing)",
+      "n": 8,
+      "recall": 1,
+      "pollution": 0,
+      "clean": 1,
+      "meanTokens": 787.25,
+      "routingPurity": 1,
+      "finalRouted": 1
+    }
+  ],
+  "B": [
+    {
+      "strategy": "Recent window (12 msgs)",
+      "n": 8,
+      "recall": 0,
+      "pollution": 0,
+      "clean": 0,
+      "meanTokens": 697.625
+    },
+    {
+      "strategy": "Full history",
+      "n": 8,
+      "recall": 1,
+      "pollution": 1,
+      "clean": 0,
+      "meanTokens": 2002.25
+    },
+    {
+      "strategy": "Vector retrieval (top-8 + last 4)",
+      "n": 8,
+      "recall": 1,
+      "pollution": 1,
+      "clean": 0,
+      "meanTokens": 676.375
+    },
+    {
+      "strategy": "Context Tree + Jev",
+      "n": 8,
+      "recall": 0.75,
+      "pollution": 0.25,
+      "clean": 0.75,
+      "meanTokens": 533.875,
+      "routingPurity": 0.96875,
+      "finalRouted": 0.75
+    },
+    {
+      "strategy": "Context Tree (oracle routing)",
+      "n": 8,
+      "recall": 1,
+      "pollution": 0,
+      "clean": 1,
+      "meanTokens": 518.125,
+      "routingPurity": 1,
+      "finalRouted": 1
+    }
+  ],
+  "D": [
+    {
+      "target": 10000,
+      "fullHistoryTokens": 9097,
+      "results": [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 840
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 9097
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 456
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 516,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 512,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    },
+    {
+      "target": 25000,
+      "fullHistoryTokens": 22079,
+      "results": [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 867
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 22079
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 429
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 516,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 512,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    },
+    {
+      "target": 50000,
+      "fullHistoryTokens": 43539,
+      "results": [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 843
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 43539
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 418
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 516,
+          "routingPurity": 0.9943661971830986,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 512,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    },
+    {
+      "target": 100000,
+      "fullHistoryTokens": 86738,
+      "results": [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 890
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 86738
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 451
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 516,
+          "routingPurity": 0.9957446808510638,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 512,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    },
+    {
+      "target": 200000,
+      "fullHistoryTokens": 173034,
+      "results": [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 853
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 173034
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 414
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 516,
+          "routingPurity": 0.997864768683274,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 512,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    }
+  ],
+  "cases": {
+    "A": [
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 850
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3369
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 808
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 907,
+          "routingPurity": 0.6785714285714286,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 795,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 871
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3421
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 596
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 788,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 783,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 873
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3399
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 473
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 802,
+          "routingPurity": 0.8928571428571429,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 799,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 860
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3385
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 561
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 809,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 806,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 829
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3374
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 472
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 795,
+          "routingPurity": 0.9642857142857143,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 790,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 842
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3356
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 713
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 764,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 760,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 858
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3379
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 509
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 627,
+          "routingPurity": 0.9285714285714286,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 807,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 900
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": false,
+          "tokens": 3381
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 476
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 762,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 758,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    ],
+    "B": [
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 707
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 1999
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 800
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": false,
+          "pollution": true,
+          "tokens": 638,
+          "routingPurity": 0.85,
+          "finalRoutedCorrectly": false
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 522,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 702
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 2017
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 391
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 529,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 526,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 680
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 1967
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 710
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": false,
+          "pollution": true,
+          "tokens": 508,
+          "routingPurity": 0.9,
+          "finalRoutedCorrectly": false
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 521,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 705
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 1984
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 825
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 495,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 491,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 705
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 2051
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 924
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 531,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 527,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 695
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 2021
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 774
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 537,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 533,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 695
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 1989
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 407
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 528,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 524,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ],
+      [
+        {
+          "strategy": "Recent window (12 msgs)",
+          "recall": false,
+          "pollution": false,
+          "tokens": 692
+        },
+        {
+          "strategy": "Full history",
+          "recall": true,
+          "pollution": true,
+          "tokens": 1990
+        },
+        {
+          "strategy": "Vector retrieval (top-8 + last 4)",
+          "recall": true,
+          "pollution": true,
+          "tokens": 580
+        },
+        {
+          "strategy": "Context Tree + Jev",
+          "recall": true,
+          "pollution": false,
+          "tokens": 505,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        },
+        {
+          "strategy": "Context Tree (oracle routing)",
+          "recall": true,
+          "pollution": false,
+          "tokens": 501,
+          "routingPurity": 1,
+          "finalRoutedCorrectly": true
+        }
+      ]
+    ]
+  }
+}
