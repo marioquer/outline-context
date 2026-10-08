@@ -40,10 +40,19 @@ class RecordingBackend implements JevBackend {
   constructor(private readonly inner: JevBackend) {
     this.name = inner.name;
   }
+  /** Retries transient failures so a flaky call does not leave a gap the replays cannot fill. */
   async route(req: JevRequest, opts?: { signal?: AbortSignal }) {
-    const res = await this.inner.route(req, opts);
-    this.log.set(keyOf(req), { req, res });
-    return res;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const res = await this.inner.route(req, opts);
+        this.log.set(keyOf(req), { req, res });
+        return res;
+      } catch (err) {
+        if (attempt >= 3 || opts?.signal?.aborted) throw err;
+        console.warn(`  retrying after: ${err instanceof Error ? err.message : String(err)}`);
+        await new Promise((r) => setTimeout(r, 3000));
+      }
+    }
   }
 }
 
@@ -90,7 +99,10 @@ for (const b of backends) {
   for (const prompt of ['v1', 'v2'] as const) {
     const rec = new RecordingBackend(b.make(prompt));
     const live = await runRouter(`${b.label} ${prompt}`, () => new JevRouter({ backend: rec, timeoutMs: 20_000, fallback: new StayRouter() }), DATA);
-    if (live.metrics.fallbacks > 0) console.warn(`${b.label} ${prompt}: ${live.metrics.fallbacks} fallbacks in the live pass`);
+    if (live.metrics.fallbacks > 0) {
+      console.warn(`${b.label} ${prompt}: ${live.metrics.fallbacks} fallbacks in the live pass`);
+      for (const f of live.failures.filter((x) => x.fallback)) console.warn(`  ${f.id}: ${f.fallback}`);
+    }
     console.log(`${b.label} ${prompt}: live strict ${pct(live.metrics.targetAccuracyStrict)}, ${rec.log.size} responses recorded`);
 
     // Where the fork mass sits on the cases that should fork.
