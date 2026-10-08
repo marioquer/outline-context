@@ -16,11 +16,26 @@ import {
   type Router,
 } from '../strategies/shared.ts';
 import { JevRouter } from '@context-tree/jev';
-import { CASES, TREES, type Category, type Outcome, type RoutingCase } from '../datasets/routing-fixtures.ts';
+import { CASES, TREES, type Category, type FixtureTree, type Outcome, type RoutingCase } from '../datasets/routing-fixtures.ts';
+import { HOLDOUT_CASES, HOLDOUT_TREES } from '../datasets/routing-holdout.ts';
 import { fmtPct, mdTable, mean, percentile, ratio, writeResult } from '../lib.ts';
 
-function buildSession(router: Router, c: RoutingCase): ContextTreeSession {
-  const def = TREES.find((t) => t.id === c.tree)!;
+export interface RoutingDataset {
+  name: string;
+  trees: FixtureTree[];
+  cases: RoutingCase[];
+}
+
+export const DEV_SET: RoutingDataset = { name: 'development', trees: TREES, cases: CASES };
+export const HOLDOUT_SET: RoutingDataset = { name: 'held-out', trees: HOLDOUT_TREES, cases: HOLDOUT_CASES };
+
+/** ROUTING_SET=holdout selects the held-out cases; anything else the development fixtures. */
+export function datasetFromEnv(): RoutingDataset {
+  return process.env.ROUTING_SET === 'holdout' ? HOLDOUT_SET : DEV_SET;
+}
+
+function buildSession(router: Router, c: RoutingCase, trees: FixtureTree[]): ContextTreeSession {
+  const def = trees.find((t) => t.id === c.tree)!;
   const rootId = `${def.id}:root`;
   const s = createContextTree({ router, root: { id: rootId, title: def.rootTitle, summary: def.rootSummary } });
   let t = 1_000_000;
@@ -53,11 +68,11 @@ interface CaseResult {
   fallback: string | null;
 }
 
-export async function runRouter(name: string, make: () => Router) {
+export async function runRouter(name: string, make: () => Router, data: RoutingDataset = DEV_SET) {
   const results: CaseResult[] = [];
-  for (const c of CASES) {
+  for (const c of data.cases) {
     const router = make();
-    const s = buildSession(router, c);
+    const s = buildSession(router, c, data.trees);
     const rootId = `${c.tree}:root`;
     const requestTokens = await estimateRequestTokens(s, c.message);
     const r = await s.add({ content: c.message });
@@ -86,7 +101,7 @@ export async function runRouter(name: string, make: () => Router) {
   const expSwitch = by((r) => r.expected.action === 'switch');
   const expFork = by((r) => r.expected.action === 'fork');
   const predFork = by((r) => r.action === 'fork');
-  const categories = [...new Set(CASES.map((c) => c.category))];
+  const categories = [...new Set(data.cases.map((c) => c.category))];
   return {
     router: name,
     cases: results.length,

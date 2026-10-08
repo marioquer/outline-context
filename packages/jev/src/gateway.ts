@@ -16,13 +16,42 @@ const NEW = 'NEW';
 
 type Evaluate = typeof evaluate;
 
+/**
+ * Route question wording. `v1` (default) asks for the context a message is
+ * about, so a new question under an existing topic tends to go to that topic.
+ * `v2` asks for NEW whenever the message opens a question no context covers yet.
+ */
+export type RoutePrompt = 'v1' | 'v2';
+
+const ROUTE_PROMPTS: Record<RoutePrompt, { instructions: string; fork: string }> = {
+  v1: {
+    instructions:
+      'Which working context does new_message belong to? Choose the context it continues, returns to, or is about. ' +
+      'Prefer the current context for follow-ups. Choose NEW only for a durable new working context, not for a small change of wording or angle.',
+    fork: 'A new durable working context: the message starts its own goal or decision thread that none of the listed contexts covers, and it is likely to be returned to later.',
+  },
+  v2: {
+    instructions:
+      'Which working context does new_message belong to? Choose an existing context only if new_message continues or returns to a question, task or decision already discussed there. ' +
+      'Prefer the current context for follow-ups and rewordings. If new_message opens a new specific question, task or decision that no listed context has discussed yet, choose NEW, ' +
+      'even when it falls under one of their broad topics: it will be placed under that topic.',
+    fork: 'A new working context: new_message opens a specific question, task or decision that none of the listed contexts has discussed yet, even if it belongs under one of them.',
+  },
+};
+
 export interface GatewayJevBackendOptions {
   /** Default: JEV_MODEL env var, else `typesafe-ai/jev`. */
   model?: string;
   /** Retries for transient gateway failures. Default 1. */
   maxRetries?: number;
+  /** Route question wording. Default: JEV_ROUTE_PROMPT env var, else `v1`. */
+  routePrompt?: RoutePrompt;
   /** Injectable for tests. */
   evaluate?: Evaluate;
+}
+
+export function routePromptFromEnv(): RoutePrompt {
+  return process.env.JEV_ROUTE_PROMPT === 'v2' ? 'v2' : 'v1';
 }
 
 /** Used only when Jev returns a bare choice without a distribution. */
@@ -35,8 +64,10 @@ export class GatewayJevBackend implements JevBackend {
   lastCall: { inputTokens?: number; outputTokens?: number; latencyMs: number } | null = null;
   private readonly maxRetries: number;
   private readonly evaluateFn: Evaluate;
+  readonly routePrompt: RoutePrompt;
 
   constructor(opts: GatewayJevBackendOptions = {}) {
+    this.routePrompt = opts.routePrompt ?? routePromptFromEnv();
     this.model = opts.model ?? (process.env.JEV_MODEL?.trim() || DEFAULT_JEV_MODEL);
     this.name = this.model;
     this.maxRetries = opts.maxRetries ?? 1;
@@ -47,7 +78,8 @@ export class GatewayJevBackend implements JevBackend {
    * Candidates get short positional keys (c0, c1, …): node ids are noise to
    * the model and cost tokens in the state and in every option.
    */
-  static buildCall(req: JevRequest) {
+  static buildCall(req: JevRequest, prompt: RoutePrompt = 'v1') {
+    const wording = ROUTE_PROMPTS[prompt];
     const keys = req.candidates.map((_, i) => `c${i}`);
     const label = (i: number) => {
       const c = req.candidates[i]!;
@@ -67,16 +99,13 @@ export class GatewayJevBackend implements JevBackend {
     const routeCriteria: Record<string, string> = {};
     keys.forEach((k, i) => (routeCriteria[k] = label(i)));
     if (req.allowFork) {
-      routeCriteria[NEW] =
-        'A new durable working context: the message starts its own goal or decision thread that none of the listed contexts covers, and it is likely to be returned to later.';
+      routeCriteria[NEW] = wording.fork;
     }
 
     const questions: Record<string, { type: 'choice'; instructions: string; criteria: Record<string, string> }> = {
       route: {
         type: 'choice',
-        instructions:
-          'Which working context does new_message belong to? Choose the context it continues, returns to, or is about. ' +
-          'Prefer the current context for follow-ups. Choose NEW only for a durable new working context, not for a small change of wording or angle.',
+        instructions: wording.instructions,
         criteria: routeCriteria,
       },
     };
@@ -97,7 +126,7 @@ export class GatewayJevBackend implements JevBackend {
   }
 
   async route(req: JevRequest, { signal }: { signal?: AbortSignal } = {}): Promise<JevResponse> {
-    const { keys, state, questions } = GatewayJevBackend.buildCall(req);
+    const { keys, state, questions } = GatewayJevBackend.buildCall(req, this.routePrompt);
     const started = performance.now();
     const result = await this.evaluateFn({
       model: this.model,
@@ -137,7 +166,7 @@ export class GatewayJevBackend implements JevBackend {
  * Use Jev's distribution as given. If it only commits to a choice, put most
  * of the mass there and spread the rest evenly instead of inventing numbers.
  */
-function distribution(answer: { choice: string; probabilities?: Record<string, number> }, options: string[]): Record<string, number> {
+export function distribution(answer: { choice: string; probabilities?: Record<string, number> }, options: string[]): Record<string, number> {
   if (answer.probabilities) {
     const raw = Object.fromEntries(options.map((o) => [o, Math.max(0, Number(answer.probabilities![o] ?? 0))]));
     const total = Object.values(raw).reduce((a, b) => a + b, 0);

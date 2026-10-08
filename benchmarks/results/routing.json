@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generatedAt": "2026-09-29T05:46:33.087Z",
-    "commit": "9a48de9",
+    "generatedAt": "2026-10-08T05:44:22.313Z",
+    "commit": "34714cf",
     "node": "v22.22.3"
   },
   "runs": [
@@ -652,8 +652,8 @@
         "actionAccuracy": 0.7543859649122807,
         "targetAccuracyStrict": 0.7017543859649122,
         "targetAccuracyLenient": 0.7017543859649122,
-        "latencyP50Ms": 0.0820410000000038,
-        "latencyP95Ms": 0.18712500000000887,
+        "latencyP50Ms": 0.08070799999998712,
+        "latencyP95Ms": 0.19308399999999892,
         "meanRequestTokens": 605.8421052631579,
         "fallbacks": 0
       },
@@ -696,7 +696,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.18712500000000887,
+          "latencyMs": 0.16291599999999562,
           "requestTokens": 693,
           "fallback": null
         },
@@ -712,7 +712,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.1536249999999768,
+          "latencyMs": 0.1490000000000009,
           "requestTokens": 686,
           "fallback": null
         },
@@ -728,7 +728,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.18670799999998167,
+          "latencyMs": 0.19308399999999892,
           "requestTokens": 492,
           "fallback": null
         },
@@ -740,12 +740,12 @@
             "target": "auth"
           },
           "action": "fork",
-          "active": "n_mum97aouuvqze2pg",
+          "active": "n_muz435s9uvaixfhn",
           "parent": "auth",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.14337500000002024,
+          "latencyMs": 0.16312500000000796,
           "requestTokens": 696,
           "fallback": null
         },
@@ -757,12 +757,12 @@
             "target": "plot"
           },
           "action": "fork",
-          "active": "n_mum97aouv97xc3rf",
+          "active": "n_muz435s9v9d4wyjj",
           "parent": "plot",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.05987500000000523,
+          "latencyMs": 0.06012499999999932,
           "requestTokens": 484,
           "fallback": null
         },
@@ -781,7 +781,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.08279100000001449,
+          "latencyMs": 0.08074999999999477,
           "requestTokens": 701,
           "fallback": null
         },
@@ -800,7 +800,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.07995800000000486,
+          "latencyMs": 0.07758300000000418,
           "requestTokens": 693,
           "fallback": null
         },
@@ -819,7 +819,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.11904200000000742,
+          "latencyMs": 0.10474999999999568,
           "requestTokens": 504,
           "fallback": null
         },
@@ -838,7 +838,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.05795799999998508,
+          "latencyMs": 0.05637500000000273,
           "requestTokens": 507,
           "fallback": null
         },
@@ -856,7 +856,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.05258399999999597,
+          "latencyMs": 0.0529160000000104,
           "requestTokens": 493,
           "fallback": null
         },
@@ -870,12 +870,12 @@
             ]
           },
           "action": "fork",
-          "active": "n_mum97aoz16onngoq3",
+          "active": "n_muz435sd16oyi8be0",
           "parent": "cabinets",
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.05383399999999483,
+          "latencyMs": 0.051124999999984766,
           "requestTokens": 497,
           "fallback": null
         },
@@ -890,12 +890,12 @@
             ]
           },
           "action": "fork",
-          "active": "n_mum97aoz17lph7wd2",
+          "active": "n_muz435se17lkiw1bu",
           "parent": "plot",
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.052791000000013355,
+          "latencyMs": 0.08583400000000552,
           "requestTokens": 491,
           "fallback": null
         },
@@ -907,12 +907,12 @@
             "target": "plot"
           },
           "action": "fork",
-          "active": "n_mum97ap01apaknmgr",
+          "active": "n_muz435sf1ap55f6w5",
           "parent": "chars",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.04912500000000364,
+          "latencyMs": 0.051625000000001364,
           "requestTokens": 487,
           "fallback": null
         },
@@ -928,7 +928,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.07883300000000304,
+          "latencyMs": 0.08029100000001677,
           "requestTokens": 688,
           "fallback": null
         },
@@ -940,12 +940,12 @@
             "target": "eng"
           },
           "action": "fork",
-          "active": "n_mum97ap11dgftp4fb",
+          "active": "n_muz435sg1dgcyvkg2",
           "parent": "eng",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.07558299999999463,
+          "latencyMs": 0.07687500000000114,
           "requestTokens": 687,
           "fallback": null
         },
@@ -957,12 +957,12 @@
             "target": "fitness"
           },
           "action": "fork",
-          "active": "n_mum97ap21du2328t9",
+          "active": "n_muz435sg1duct1gw5",
           "parent": "fitness",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.04937500000002615,
+          "latencyMs": 0.050041999999990594,
           "requestTokens": 483,
           "fallback": null
         },
@@ -974,12 +974,12 @@
             "target": "auth"
           },
           "action": "fork",
-          "active": "n_mum97ap21edfoyb24",
+          "active": "n_muz435sg1edpwh53o",
           "parent": "auth",
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.08041700000001129,
+          "latencyMs": 0.07854199999999878,
           "requestTokens": 693,
           "fallback": null
         }
@@ -997,8 +997,8 @@
         "actionAccuracy": 0.9122807017543859,
         "targetAccuracyStrict": 0.8947368421052632,
         "targetAccuracyLenient": 0.9122807017543859,
-        "latencyP50Ms": 0.24904199999997445,
-        "latencyP95Ms": 0.7469999999999857,
+        "latencyP50Ms": 0.24391699999998195,
+        "latencyP95Ms": 0.831957999999986,
         "meanRequestTokens": 605.8421052631579,
         "fallbacks": 0
       },
@@ -1041,7 +1041,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.2525829999999871,
+          "latencyMs": 0.23883299999999963,
           "requestTokens": 695,
           "fallback": null
         },
@@ -1060,7 +1060,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.22020800000001373,
+          "latencyMs": 0.2849999999999966,
           "requestTokens": 504,
           "fallback": null
         },
@@ -1078,7 +1078,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.15545799999998167,
+          "latencyMs": 0.15725000000000477,
           "requestTokens": 497,
           "fallback": null
         },
@@ -1093,12 +1093,12 @@
             ]
           },
           "action": "fork",
-          "active": "n_mum97apm1wy11t8gu",
+          "active": "n_muz435t11wy3ky6o0",
           "parent": "plot",
           "strict": false,
           "lenient": false,
           "actionCorrect": true,
-          "latencyMs": 0.16970899999998323,
+          "latencyMs": 0.16741700000000037,
           "requestTokens": 491,
           "fallback": null
         },
@@ -1114,7 +1114,7 @@
           "strict": false,
           "lenient": false,
           "actionCorrect": false,
-          "latencyMs": 0.15354200000001583,
+          "latencyMs": 0.14970800000000395,
           "requestTokens": 487,
           "fallback": null
         },
@@ -1130,7 +1130,7 @@
           "strict": false,
           "lenient": true,
           "actionCorrect": false,
-          "latencyMs": 0.1582080000000019,
+          "latencyMs": 0.1599999999999966,
           "requestTokens": 491,
           "fallback": null
         }

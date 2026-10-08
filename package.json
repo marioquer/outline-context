@@ -21,6 +21,7 @@
     "bench:switching": "tsx benchmarks/runners/switching.ts",
     "bench:llm": "tsx benchmarks/runners/llm-answers.ts",
     "bench:jev": "tsx benchmarks/runners/routing-jev.ts",
+    "bench:calibrate": "tsx benchmarks/runners/routing-calibration.ts",
     "jev:check": "tsx scripts/jev-check.ts"
   },
   "devDependencies": {

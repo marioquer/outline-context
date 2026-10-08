@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "generatedAt": "2026-10-08T05:10:18.455Z",
+    "commit": "d8afb44",
+    "node": "v22.22.3"
+  },
+  "run": {
+    "router": "JevRouter (openai/gpt-6-luna (decisions))",
+    "cases": 57,
+    "metrics": {
+      "stayAccuracy": 0.9545454545454546,
+      "switchAccuracy": 0.92,
+      "forkPrecision": 1,
+      "forkRecall": 0.3,
+      "forkParentAccuracy": 1,
+      "actionAccuracy": 0.8245614035087719,
+      "targetAccuracyStrict": 0.8245614035087719,
+      "targetAccuracyLenient": 0.8771929824561403,
+      "latencyP50Ms": 137,
+      "latencyP95Ms": 524,
+      "meanRequestTokens": 605.8421052631579,
+      "fallbacks": 0
+    },
+    "byCategory": {
+      "continuation": {
+        "n": 14,
+        "strict": 1
+      },
+      "switch": {
+        "n": 10,
+        "strict": 1
+      },
+      "return": {
+        "n": 8,
+        "strict": 1
+      },
+      "new-topic": {
+        "n": 10,
+        "strict": 0.3
+      },
+      "similar-siblings": {
+        "n": 9,
+        "strict": 0.8888888888888888
+      },
+      "ambiguous": {
+        "n": 6,
+        "strict": 0.6666666666666666
+      }
+    },
+    "failures": [
+      {
+        "id": "f01",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "search",
+            "eng"
+          ]
+        },
+        "action": "switch",
+        "active": "eng",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 130.89820899999995,
+        "requestTokens": 701,
+        "fallback": null
+      },
+      {
+        "id": "f02",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "hiring",
+            "backend"
+          ]
+        },
+        "action": "switch",
+        "active": "hiring",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 284.6845000000003,
+        "requestTokens": 701,
+        "fallback": null
+      },
+      {
+        "id": "f03",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "mkt",
+            "blog"
+          ]
+        },
+        "action": "switch",
+        "active": "mkt",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 145.4852919999994,
+        "requestTokens": 693,
+        "fallback": null
+      },
+      {
+        "id": "f05",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "novel",
+            "chars"
+          ]
+        },
+        "action": "switch",
+        "active": "novel",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 111.52912500000093,
+        "requestTokens": 504,
+        "fallback": null
+      },
+      {
+        "id": "f06",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "kitchen",
+            "counters"
+          ]
+        },
+        "action": "switch",
+        "active": "kitchen",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 212.7001249999994,
+        "requestTokens": 507,
+        "fallback": null
+      },
+      {
+        "id": "f07",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "fitness"
+          ]
+        },
+        "action": "stay",
+        "active": "fitness",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 133.24483299999883,
+        "requestTokens": 493,
+        "fallback": null
+      },
+      {
+        "id": "f10",
+        "category": "new-topic",
+        "expected": {
+          "action": "fork",
+          "parents": [
+            "novel",
+            "personal:root"
+          ]
+        },
+        "action": "switch",
+        "active": "novel",
+        "strict": false,
+        "lenient": false,
+        "actionCorrect": false,
+        "latencyMs": 136.50220900000022,
+        "requestTokens": 491,
+        "fallback": null
+      },
+      {
+        "id": "n08",
+        "category": "similar-siblings",
+        "expected": {
+          "action": "switch",
+          "target": "chars"
+        },
+        "action": "stay",
+        "active": "plot",
+        "strict": false,
+        "lenient": true,
+        "actionCorrect": false,
+        "latencyMs": 234.54237499999908,
+        "requestTokens": 491,
+        "fallback": null
+      },
+      {
+        "id": "a02",
+        "category": "ambiguous",
+        "expected": {
+          "action": "switch",
+          "target": "hiring"
+        },
+        "action": "stay",
+        "active": "budget",
+        "strict": false,
+        "lenient": true,
+        "actionCorrect": false,
+        "latencyMs": 135.6136660000011,
+        "requestTokens": 688,
+        "fallback": null
+      },
+      {
+        "id": "a04",
+        "category": "ambiguous",
+        "expected": {
+          "action": "stay",
+          "target": "eng"
+        },
+        "action": "switch",
+        "active": "q3:root",
+        "strict": false,
+        "lenient": true,
+        "actionCorrect": false,
+        "latencyMs": 311.5839160000014,
+        "requestTokens": 687,
+        "fallback": null
+      }
+    ]
+  }
+}

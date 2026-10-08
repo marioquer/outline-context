@@ -130,8 +130,20 @@ Routing (57 hand-labelled cases):
 | Lexical baseline | 70% / 70% | 64% | 92% | 45% / 50% | <1 ms (in-process) |
 | Jev, local reference backend | 89% / 91% | 100% | 88% | 100% / 80% | <1 ms (in-process) |
 | **Real Jev** (`typesafe-ai/jev`, `pnpm bench:jev`) | **89% / 93%** | 100% | 92% | 100% / 60% | 324 ms (gateway round trip) |
+| OpenAI Decisions (`gpt-6-luna`, `JEV_BACKEND=openai pnpm bench:jev`) | 82% / 88% | 95% | 92% | 100% / 30% | 128 ms (API round trip) |
 
-Real Jev: 57 calls, 0 fallbacks, 1,470 input tokens per call as reported by the gateway.
+Real Jev: 57 calls, 0 fallbacks, 1,470 input tokens per call as reported by the gateway. OpenAI Decisions is asked the same two questions with the same wording: 57 calls, 0 fallbacks, 968 input tokens per call; two runs gave the same 10 misses.
+
+**Calibration (`pnpm bench:calibrate`, in-sample).** Both routers under-fork. Replaying recorded responses with the fork probability multiplied by a constant: real Jev reaches 96% strict / 100% lenient with FORK precision and recall both 100% for any multiplier from 16 to 64; OpenAI Decisions peaks at 88%. A reworded route question (`v2`) also raises FORK recall but over-forks unless damped (Jev 95%, OpenAI 91% at best). These settings were chosen on the same 57 cases they are scored on.
+
+**Held-out check (`ROUTING_SET=holdout pnpm bench:calibrate`).** 44 new cases in two new domains, committed before any router ran on them. Most new topics there are unannounced, and 8 cases are new angles inside the active topic that should stay. The pre-registered test was real Jev with fork ×16: adopt it only if strict accuracy does not drop and FORK precision stays at or above 90%.
+
+| Real Jev, prompt v1 | Strict / lenient | STAY | FORK precision / recall |
+| --- | --- | --- | --- |
+| fork ×1 (default) | 80% / 84% | 100% | 100% / 43% |
+| fork ×16 (pre-registered) | 89% / 95% | 89% | 86% / 86% |
+
+Accuracy rose by 9 points and none of the 8 near-miss cases forked. But FORK precision of 86% misses the pre-registered bar, so ×16 is not adopted. Of the two extra forks, one is acceptable under the lenient labels (ha3); the other opened a new node for "How are we doing overall?" (ha4). The reworded `v2` prompt over-forks on these cases (Jev STAY 72%), so it is dropped. OpenAI Decisions improves from 70% to 80% with ×16. The held-out baseline for real Jev was 77% in a separate run, against 80% here, so real Jev is not fully deterministic on this set. Full results: [`routing-calibration.md`](benchmarks/results/routing-calibration.md), [`routing-calibration-holdout.md`](benchmarks/results/routing-calibration-holdout.md).
 
 ### What this shows, and what it does not
 

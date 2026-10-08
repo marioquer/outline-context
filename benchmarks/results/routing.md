@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Always STAY | 100% | 0% | – | 0% | – | 39% | 42% | 0.00 / 0.00 ms |
 | MockRouter (lexical) | 64% | 92% | 45% | 50% | 60% | 70% | 70% | 0.08 / 0.19 ms |
-| JevRouter (local reference backend) | 100% | 88% | 100% | 80% | 88% | 89% | 91% | 0.25 / 0.75 ms |
+| JevRouter (local reference backend) | 100% | 88% | 100% | 80% | 88% | 89% | 91% | 0.24 / 0.83 ms |
 
 By category (strict):
 

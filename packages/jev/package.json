@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./gateway": "./src/gateway.ts"
+    "./gateway": "./src/gateway.ts",
+    "./openai": "./src/openai.ts"
   },
   "types": "./src/index.ts",
   "sideEffects": false,

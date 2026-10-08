@@ -156,3 +156,50 @@ describe('GatewayJevBackend', () => {
     expect(r.decision!.confidence).toBeCloseTo(0.88, 5);
   });
 });
+
+describe('OpenAIDecisionsBackend', () => {
+  const reply = (body: unknown) => new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json' } });
+
+  it('posts route + parent as choice questions and maps the distribution', async () => {
+    const { OpenAIDecisionsBackend } = await import('@context-tree/jev/openai');
+    let url = '';
+    let req: any;
+    const backend = new OpenAIDecisionsBackend({
+      apiKey: 'test-key',
+      fetch: (async (u: string, init: RequestInit) => {
+        url = u;
+        req = JSON.parse(String(init.body));
+        const route = req.questions.find((q: any) => q.name === 'route');
+        const pricing = route.choices.find((c: any) => c.description.endsWith('Pricing')).value;
+        return reply({
+          answers: [
+            { type: 'choice', name: 'route', choice: pricing, confidence: 0.9, probabilities: route.choices.map((c: any) => ({ value: c.value, probability: c.value === pricing ? 0.9 : 0.1 / (route.choices.length - 1) })) },
+            { type: 'choice', name: 'parent', choice: pricing, probabilities: [] },
+          ],
+        });
+      }) as any,
+    });
+    const ct = project(new JevRouter({ backend }));
+    ct.activate('launch');
+    const r = await ct.add({ content: 'Back to pricing' });
+    expect(url).toBe('https://api.openai.com/v1/decisions');
+    expect(req.model).toBe('gpt-6-luna');
+    expect(JSON.parse(req.input).new_message).toBe('Back to pricing');
+    expect(req.questions.map((q: any) => q.name)).toEqual(['route', 'parent']);
+    expect(req.questions[0].choices.some((c: any) => c.value === 'NEW')).toBe(true);
+    expect(r.decision).toMatchObject({ action: 'switch', targetNodeId: 'pricing' });
+    expect(r.decision!.confidence).toBeCloseTo(0.9, 5);
+  });
+
+  it('treats a refusal as a failed call, so the router falls back', async () => {
+    const { OpenAIDecisionsBackend } = await import('@context-tree/jev/openai');
+    const backend = new OpenAIDecisionsBackend({
+      apiKey: 'test-key',
+      fetch: (async () => reply({ answers: [{ type: 'refusal', name: 'route' }] })) as any,
+    });
+    const ct = project(new JevRouter({ backend, fallback: new StayRouter() }));
+    ct.activate('launch');
+    const r = await ct.add({ content: 'Back to pricing' });
+    expect(r.activeNodeId).toBe('launch');
+  });
+});
