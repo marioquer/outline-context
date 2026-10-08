@@ -130,8 +130,11 @@ Routing (57 hand-labelled cases):
 | Lexical baseline | 70% / 70% | 64% | 92% | 45% / 50% | <1 ms (in-process) |
 | Jev, local reference backend | 89% / 91% | 100% | 88% | 100% / 80% | <1 ms (in-process) |
 | **Real Jev** (`typesafe-ai/jev`, `pnpm bench:jev`) | **89% / 93%** | 100% | 92% | 100% / 60% | 324 ms (gateway round trip) |
+| OpenAI Decisions (`gpt-6-luna`, `JEV_BACKEND=openai pnpm bench:jev`) | 82% / 88% | 95% | 92% | 100% / 30% | 128 ms (API round trip) |
 
-Real Jev: 57 calls, 0 fallbacks, 1,470 input tokens per call as reported by the gateway.
+Real Jev: 57 calls, 0 fallbacks, 1,470 input tokens per call as reported by the gateway. OpenAI Decisions is asked the same two questions with the same wording: 57 calls, 0 fallbacks, 968 input tokens per call; two runs gave the same 10 misses.
+
+**Calibration (`pnpm bench:calibrate`, in-sample).** Both routers under-fork. Replaying recorded responses with the fork probability multiplied by a constant: real Jev reaches 96% strict / 100% lenient with FORK precision and recall both 100% for any multiplier from 16 to 64; OpenAI Decisions peaks at 88%. A reworded route question (`v2`) also raises FORK recall but over-forks unless damped (Jev 95%, OpenAI 91% at best). These settings were chosen on the same 57 cases they are scored on, so they are not yet evidence; a held-out fixture set is the next step. Full sweep: [`benchmarks/results/routing-calibration.md`](benchmarks/results/routing-calibration.md).
 
 ### What this shows, and what it does not
 

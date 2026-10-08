@@ -27,6 +27,14 @@ const jev = optional(
   'routing-jev.md',
   '### Benchmark E — Routing with real Jev\n\nNot run yet. Run `AI_GATEWAY_API_KEY=... pnpm bench:jev` to score typesafe-ai/jev on the same fixtures.',
 );
+const decisions = optional(
+  'routing-openai-decisions.md',
+  '### Benchmark E — Routing with OpenAI Decisions\n\nNot run yet. Run `OPENAI_API_KEY=... JEV_BACKEND=openai pnpm bench:jev` to score the same questions on OpenAI\'s Decisions API.',
+);
+const calibration = optional(
+  'routing-calibration.md',
+  '### Calibration — fork bias and route wording\n\nNot run yet. Run `pnpm bench:calibrate` with AI_GATEWAY_API_KEY and/or OPENAI_API_KEY set.',
+);
 const llm = optional(
   'llm-answers.md',
   '### LLM-graded answers\n\nNot run yet. Run `ANTHROPIC_API_KEY=... pnpm bench:llm` to grade real model answers.',
@@ -46,6 +54,10 @@ const doc = [
   routing.md,
   '',
   jev,
+  '',
+  decisions,
+  '',
+  calibration,
   '',
   llm,
   '',

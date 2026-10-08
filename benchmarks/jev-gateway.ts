@@ -5,14 +5,16 @@
 import type { JevBackend, JevRequest, JevResponse } from '@context-tree/jev';
 import { GatewayJevBackend } from '@context-tree/jev/gateway';
 
+type CallUsage = { inputTokens?: number; outputTokens?: number; latencyMs: number };
+
 /** Spaces calls so the run stays under the gateway's request rate limit. */
 export class ThrottledJevBackend implements JevBackend {
   private next = 0;
   readonly name: string;
   /** Gateway usage per completed call; latencyMs is the round trip, excluding the throttle wait. */
-  readonly usage: Array<{ inputTokens?: number; outputTokens?: number; latencyMs: number }> = [];
+  readonly usage: CallUsage[] = [];
   constructor(
-    private readonly inner = new GatewayJevBackend(),
+    private readonly inner: JevBackend & { lastCall: CallUsage | null } = new GatewayJevBackend(),
     private readonly minIntervalMs = Number(process.env.JEV_MIN_INTERVAL_MS ?? 2100),
   ) {
     this.name = inner.name;
