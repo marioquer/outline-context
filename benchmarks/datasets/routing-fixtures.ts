@@ -23,7 +23,17 @@ export interface FixtureTree {
   nodes: FixtureNode[];
 }
 
-export type Category = 'continuation' | 'switch' | 'return' | 'new-topic' | 'similar-siblings' | 'ambiguous';
+export type Category =
+  | 'continuation'
+  | 'switch'
+  | 'return'
+  | 'new-topic'
+  | 'similar-siblings'
+  | 'ambiguous'
+  /** Held-out set only: a new durable question with no announcement. */
+  | 'implicit-fork'
+  /** Held-out set only: a new angle inside the active topic that should STAY. */
+  | 'near-miss';
 
 export interface Outcome {
   action: 'stay' | 'switch' | 'fork';
